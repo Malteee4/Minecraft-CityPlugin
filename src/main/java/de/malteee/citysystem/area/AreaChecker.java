@@ -113,6 +113,9 @@ public class AreaChecker implements Listener {
                             if (pl.getCurrentArea() != null) {
                                 if (pl.getCurrentArea().getType().equals(Area.AreaType.CITY)) {
                                     pl.toPlayer().sendMessage(pl.getCurrentArea().getCity().getGoodbyeMessage());
+                                    pl.toPlayer().sendMessage("§7You've entered the wilderness!");
+                                }else if (pl.getCurrentArea().getType().equals(Area.AreaType.SPAWN)) {
+                                    pl.toPlayer().sendMessage("§7You've entered the wilderness!");
                                 }
                             }
                             pl.setCurrentArea(null);

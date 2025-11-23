@@ -19,3 +19,14 @@
 	- safe current date
 	- check date with last saved date -> difference? -> start new day
 - hotels!
+
+- city parts
+    - name
+    - population count
+    - plot count
+    - toggle showing messages when entering specific parts
+- special information for plots
+    - city part
+    - inhabitants (Untermieter)
+    - special name
+    - toggle showing messages when entering

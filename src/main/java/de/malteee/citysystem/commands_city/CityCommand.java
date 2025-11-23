@@ -53,6 +53,9 @@ public class CityCommand implements CommandExecutor {
             case "tp" -> {
 
             }
+            case "markarea" -> {
+
+            }
             case "overview" -> {
                 //TODO: gui with general information, button to change name, button to set spawn, button to plot overview
             }

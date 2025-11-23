@@ -11,18 +11,22 @@ import de.malteee.citysystem.commands_general.WorldSpawnCommand;
 import de.malteee.citysystem.commands_general.*;
 import de.malteee.citysystem.core.*;
 import de.malteee.citysystem.core.Database;
+import de.malteee.citysystem.money_system.Konto;
 import de.malteee.citysystem.money_system.MoneyManager;
 import de.malteee.citysystem.plots.PlotManager;
 import de.malteee.citysystem.utilities.*;
 import de.malteee.citysystem.chat.PlayerChatListener;
 import de.malteee.citysystem.world_managing.*;
 import org.bukkit.*;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -79,6 +83,7 @@ public class CitySystem extends JavaPlugin {
         getCommand("tutorial").setExecutor(new TutorialCommand());
         getCommand("database").setExecutor(new DatabaseCommand());
         getCommand("mot").setExecutor(new MotCommand());
+        getCommand("loginStreak").setExecutor(new LoginBonusCommand());
 
         for(int i = 0; i < maps.size(); i++) {
             if (maps.get(i).equalsIgnoreCase("mainWorld")) {
@@ -173,7 +178,7 @@ public class CitySystem extends JavaPlugin {
 
     public static void removePlayer(CityPlayer player) {
         players.remove(player);
-        StatsSaver.PlayerLeft(player.toPlayer());
+        StatsSaver.safeStats(player.toPlayer());
     }
 
     public static CityPlayer getCityPlayer(Player player) {

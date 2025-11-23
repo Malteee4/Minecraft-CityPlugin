@@ -41,3 +41,5 @@ commands:
     description: admin use only
   mot:
     description: shows you how much money you earned today by playing
+  loginStreak:
+    description: shows your current login streak

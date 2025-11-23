@@ -38,13 +38,19 @@ public class PlayerJoinListener implements Listener {
         if (!(config.contains("login_today"))) {
             ArrayList<String> list = new ArrayList<>(); list.add(player.getUniqueId().toString());
             config.set("login_today", list);
+            config.set("active." + player.getUniqueId().toString(), 1);
+            config.set("active.list", list);
         }else {
             List<String> list = config.getStringList("login_today");
+            List<String> active_list = config.getStringList("active.list");
             if (!list.contains(player.getUniqueId().toString())) {
                 list.add(player.getUniqueId().toString());
                 config.set("login_today", list);
                 config.set("active." + player.getUniqueId().toString(), (config.getInt("active." + player.getUniqueId().toString()) + 1));
                 CitySystem.getMm().getKonto(cPlayer).addMoney((int) (10 * Math.sqrt(config.getInt("active." + player.getUniqueId().toString())) + 10));
+            }if (!active_list.contains(player.getUniqueId().toString())) {
+                active_list.add(player.getUniqueId().toString());
+                config.set("active.list", active_list);
             }
         }CitySystem.getPlugin().saveConfig();
     }

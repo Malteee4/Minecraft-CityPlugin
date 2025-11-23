@@ -14,10 +14,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerInteractEntityEvent;
-import org.bukkit.event.player.PlayerInteractEvent;
-import org.bukkit.event.player.PlayerPortalEvent;
+import org.bukkit.event.player.*;
 import org.bukkit.event.world.PortalCreateEvent;
 
 import java.util.*;
@@ -112,12 +109,14 @@ public class PlayerManipulateWorldListener implements Listener {
     public void handlePlayerChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
         if (creatingCity.containsKey(player.getUniqueId())) {
+            event.setCancelled(true);
             String name = event.getMessage();
             if (name.equalsIgnoreCase("cancel")) {
                 creatingCity.get(player.getUniqueId()).setType(Material.AIR);
                 creatingCity.remove(player.getUniqueId());
                 player.getInventory().addItem(new ItemBuilder(Material.BEDROCK, 1).build());
                 player.sendMessage("§eYour action has been canceled!");
+                //TODO: full inventory
             }
             if (name.length() > 20) {
                 player.sendMessage("§cYour city's name can't be longer than 20 letters!");
@@ -131,6 +130,18 @@ public class PlayerManipulateWorldListener implements Listener {
             creatingCity.get(player.getUniqueId()).setType(Material.AIR);
             creatingCity.remove(player.getUniqueId());
             player.sendMessage("§aYour city has been founded!");
+        }
+    }
+
+    @EventHandler
+    public void handlePlayerDisconnect(PlayerQuitEvent event) {
+        Player player = event.getPlayer();
+        if (creatingCity.containsKey(player.getUniqueId())) {
+            creatingCity.get(player.getUniqueId()).setType(Material.AIR);
+            creatingCity.remove(player.getUniqueId());
+            player.getInventory().addItem(new ItemBuilder(Material.BEDROCK, 1).build());
+            player.sendMessage("§eYour action has been canceled!");
+            //TODO: full inventory
         }
     }
 
