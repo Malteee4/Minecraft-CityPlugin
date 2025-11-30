@@ -14,11 +14,12 @@ import org.bukkit.event.Listener;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class City implements Listener {
 
     private String name, welcome, goodbye;
-    private Player owner;
+    private UUID owner;
     private ArrayList<Player> buildingRight = new ArrayList<>();
     private List<Expansion> expansions = new ArrayList<>();
 
@@ -35,15 +36,15 @@ public class City implements Listener {
 
     public City(String name, Player owner, Area area, Location position) {
         try {
-            CitySystem.getDatabase().execute("INSERT INTO tbl_city(CITY_ID, WELCOME_MSG, GOODBYE_MSG, SPAWN, PLAYER_ID, DAYS_ACTIVE, PUBLIC_SPAWN, BUILD_RIGHT, EXPANSION) VALUES(" +
-                    "'" + name + "', 'You've entered a city!', '', '" + Tools.locationToString(position) + "', '" + owner.getUniqueId().toString() + "', 1, 'FALSE', '', '')");
+            CitySystem.getDatabase().execute("INSERT INTO tbl_city(CITY_ID, WELCOME_MSG, GOODBYE_MSG, SPAWN, PLAYER_ID, DAYS_ACTIVE, PUBLIC_SPAWN, BUILD_RIGHT, EXPANSION, STAGE) VALUES(" +
+                    "'" + name + "', 'You''ve entered a city!', '', '" + Tools.locationToString(position) + "', '" + owner.getUniqueId().toString() + "', 1, 'FALSE', '', '', '" + Stage.SETTLEMENT + "')");
             CitySystem.getDatabase().execute("INSERT INTO tbl_city_areas(CITY_ID, AREA_ID) VALUES('" + name + "', '" + area.getId() + "')");
             daysActive = 1;
             areas.add(area);
             area.setCity(this);
-            this.owner = owner;
+            this.owner = owner.getUniqueId();
             this.name = name;
-            this.welcome = "§7You've entered a city!";
+            this.welcome = "You've entered a city!";
             this.spawnpoint = position;
             this.stage = Stage.SETTLEMENT;
         } catch (Exception e) {
@@ -55,12 +56,17 @@ public class City implements Listener {
         try {
             ResultSet rs = CitySystem.getDatabase().getCon().prepareStatement("SELECT * FROM tbl_city WHERE CITY_ID = '" + id + "'").executeQuery();
             while (rs.next()) {
-                this.owner = Bukkit.getPlayer(rs.getString("PLAYER_ID"));
+                this.owner = UUID.fromString(rs.getString("PLAYER_ID"));
                 this.welcome = rs.getString("WELCOME_MSG");
                 this.goodbye = rs.getString("GOODBYE_MSG");
                 this.spawnpoint = Tools.getLocFromString(rs.getString("SPAWN"), CitySystem.getPlugin());
                 this.daysActive = rs.getInt("DAYS_ACTIVE");
                 this.publicSpawn = rs.getBoolean("PUBLIC_SPAWN");
+                try {
+                    this.stage = Stage.valueOf(rs.getString("STAGE"));
+                } catch (Exception e) {
+                    this.stage = Stage.SETTLEMENT;
+                }
             }rs.close();
             rs = CitySystem.getDatabase().getCon().prepareStatement("SELECT * FROM tbl_city_areas WHERE CITY_ID = '" + id + "'").executeQuery();
             while (rs.next()) {
@@ -107,7 +113,7 @@ public class City implements Listener {
         return spawnpoint;
     }
 
-    public Player getOwner() {
+    public UUID getOwner() {
         return owner;
     }
 
@@ -122,7 +128,9 @@ public class City implements Listener {
     enum Expansion {
 
         WELCOME_MSG(1, "Welcome message"),
-        GOODBYE_MSG(2, "Goodbye message");
+        GOODBYE_MSG(2, "Goodbye message"),
+        SPAWNPOINT(3, "Spawnpoint");
+
 
         Expansion(int id, String name) {
 

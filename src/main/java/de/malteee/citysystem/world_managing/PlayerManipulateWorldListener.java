@@ -6,8 +6,10 @@ import de.malteee.citysystem.area.AreaChecker;
 import de.malteee.citysystem.core.City;
 import de.malteee.citysystem.core.CityPlayer;
 import de.malteee.citysystem.utilities.ItemBuilder;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -17,6 +19,7 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.*;
 import org.bukkit.event.world.PortalCreateEvent;
 
+import java.nio.Buffer;
 import java.util.*;
 
 public class PlayerManipulateWorldListener implements Listener {
@@ -72,7 +75,7 @@ public class PlayerManipulateWorldListener implements Listener {
         if (event.getBlock().getType().equals(Material.BEDROCK)) {
             event.setCancelled(true);
             if (!event.getBlock().getWorld().equals(CitySystem.mainWorld)) {
-                player.sendMessage("§cYou can only found cities in the main world!");
+                player.sendMessage("§cYou can only found cities in the Mainworld!");
                 return;
             }
             Location middle = event.getBlock().getLocation();
@@ -108,28 +111,32 @@ public class PlayerManipulateWorldListener implements Listener {
     @EventHandler
     public void handlePlayerChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
+        CityPlayer cityPlayer = CitySystem.getCityPlayer(player);
         if (creatingCity.containsKey(player.getUniqueId())) {
             event.setCancelled(true);
-            String name = event.getMessage();
-            if (name.equalsIgnoreCase("cancel")) {
+            Bukkit.getScheduler().runTask(CitySystem.getPlugin(), () -> {
+                String name = event.getMessage();
+                if (name.equalsIgnoreCase("cancel")) {
+                    creatingCity.get(player.getUniqueId()).setType(Material.AIR);
+                    creatingCity.remove(player.getUniqueId());
+                    player.getInventory().addItem(new ItemBuilder(Material.BEDROCK, 1).setName("§6§lFoundation Stone").setLore("§7§oPlace in the Mainworld to found a city!").build());
+                    player.sendMessage("§eYour action has been canceled!");
+                    //TODO: full inventory
+                }
+                if (name.length() > 20) {
+                    player.sendMessage("§cYour city's name can't be longer than 20 letters!");
+                    return;
+                }
+                Location middle = creatingCity.get(player.getUniqueId()).getLocation();
+                Location corner1 = new Location(middle.getWorld(), middle.getBlockX() + 7, middle.getBlockY(), middle.getBlockZ() + 7);
+                Location corner2 = new Location(middle.getWorld(), middle.getBlockX() - 7, middle.getBlockY(), middle.getBlockZ() - 7);
+                Bukkit.broadcastMessage(middle.toString());
+                Area area = new Area(corner1, corner2, Area.AreaType.CITY, cityPlayer.getSuperiorArea(), true);
+                CitySystem.getCm().addCity(new City(name, player, area, middle));
                 creatingCity.get(player.getUniqueId()).setType(Material.AIR);
                 creatingCity.remove(player.getUniqueId());
-                player.getInventory().addItem(new ItemBuilder(Material.BEDROCK, 1).build());
-                player.sendMessage("§eYour action has been canceled!");
-                //TODO: full inventory
-            }
-            if (name.length() > 20) {
-                player.sendMessage("§cYour city's name can't be longer than 20 letters!");
-                return;
-            }
-            Location middle = creatingCity.get(player.getUniqueId()).getLocation();
-            Location corner1 = new Location(middle.getWorld(), middle.getBlockX() + 7, middle.getBlockY(), middle.getBlockZ() + 7);
-            Location corner2 = new Location(middle.getWorld(), middle.getBlockX() - 7, middle.getBlockY(), middle.getBlockZ() - 7);
-            Area area = new Area(corner1, corner2, Area.AreaType.CITY, null, true);
-            CitySystem.getCm().addCity(new City(name, player, area, middle));
-            creatingCity.get(player.getUniqueId()).setType(Material.AIR);
-            creatingCity.remove(player.getUniqueId());
-            player.sendMessage("§aYour city has been founded!");
+                player.sendMessage("§aYour city has been founded!");
+            });
         }
     }
 
@@ -139,7 +146,7 @@ public class PlayerManipulateWorldListener implements Listener {
         if (creatingCity.containsKey(player.getUniqueId())) {
             creatingCity.get(player.getUniqueId()).setType(Material.AIR);
             creatingCity.remove(player.getUniqueId());
-            player.getInventory().addItem(new ItemBuilder(Material.BEDROCK, 1).build());
+            player.getInventory().addItem(new ItemBuilder(Material.BEDROCK, 1).setName("§6§lFoundation Stone").setLore("§7§oPlace in the Mainworld to found a city!").build());
             player.sendMessage("§eYour action has been canceled!");
             //TODO: full inventory
         }
@@ -167,5 +174,21 @@ public class PlayerManipulateWorldListener implements Listener {
     @EventHandler
     public void onPlayerCreatePortal(PortalCreateEvent event) {
         event.setCancelled(true);
+    }
+
+    @EventHandler
+    public void handlePlayerChangeWorld(PlayerChangedWorldEvent event) {
+        Player player = event.getPlayer();
+        World targetWorld = player.getWorld();
+        World oldWorld = event.getFrom();
+        if (oldWorld.equals(CitySystem.mainWorld)) {
+            if (creatingCity.containsKey(player.getUniqueId())) {
+                creatingCity.get(player.getUniqueId()).setType(Material.AIR);
+                creatingCity.remove(player.getUniqueId());
+                player.getInventory().addItem(new ItemBuilder(Material.BEDROCK, 1).setName("§6§lFoundation Stone").setLore("§7§oPlace in the Mainworld to found a city!").build());
+                player.sendMessage("§eYour action has been canceled!");
+                //TODO: full inventory
+            }
+        }
     }
 }

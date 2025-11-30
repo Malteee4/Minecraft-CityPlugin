@@ -1,9 +1,12 @@
 package de.malteee.citysystem.commands_city;
 
 import de.malteee.citysystem.CitySystem;
+import de.malteee.citysystem.area.Area;
+import de.malteee.citysystem.core.City;
 import de.malteee.citysystem.core.CityPlayer;
 import de.malteee.citysystem.money_system.Konto;
 import de.malteee.citysystem.utilities.ItemBuilder;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -26,14 +29,19 @@ public class CityCommand implements CommandExecutor {
                     return false;
                 }
                 konto.removeMoney(1000);
-                player.getInventory().addItem(new ItemBuilder(Material.BEDROCK, 1).setName("§6§l____").setLore().build());
-                player.sendMessage("§aYou've successfully bought a ____! Place it on the ground to found a city!");
+                player.getInventory().addItem(new ItemBuilder(Material.BEDROCK, 1).setName("§6§lFoundation Stone").setLore("§7§oPlace in the Mainworld to found a city!").build());
+                player.sendMessage("§aYou've successfully bought a city foundation stone! Place it on the ground to found a city!");
             }
             case "info" -> {
-
-            }
-            case "create" -> {
-
+                if (cPlayer.getCurrentArea() == null) return false;
+                if (cPlayer.getCurrentArea().getType().equals(Area.AreaType.CITY)) {
+                    City city = cPlayer.getCurrentArea().getCity();
+                    player.sendMessage("§aYou're currently in §l" + city.getName() + "§r§a:\n" +
+                            "  §7owner: §o" + Bukkit.getOfflinePlayer(city.getOwner()).getName() + "\n" +
+                            "  §r§7stage: §o" + "\n" +
+                            "  §r§7residential plots: §o0/2" + "\n" +
+                            "  §r§7shop plots: §o---");
+                }
             }
             case "expand" -> {
 
@@ -45,7 +53,9 @@ public class CityCommand implements CommandExecutor {
 
             }
             case "list" -> {
-
+                //TODO add pages
+                for (City c : CitySystem.getCm().getCities())
+                    player.sendMessage("§a- " + c.getName());
             }
             case "spawn" -> {
 

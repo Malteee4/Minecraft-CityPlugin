@@ -23,17 +23,16 @@ public class PlayerJoinListener implements Listener {
         Player player = event.getPlayer();
         event.setJoinMessage("");
         player.setPlayerListName("  §6§l" + player.getName() + "  ");
-        if (player.getName().equals("JanikObenaus")) {
+        if (player.getName().equals("JanikObenaus"))
             player.teleport(new Location(Bukkit.getWorld("janiksWorld"), -438, 70, 206));
-            return;
-        }
         if (!CitySystem.isRegistered(player)) {
             CitySystem.registerPlayer(player);
             player.teleport(WorldSpawnCommand.worldSpawn.get(CitySystem.spawnWorld));
+            if (player.getName().equals("JanikObenaus"))
+                player.teleport(new Location(Bukkit.getWorld("janiksWorld"), -438, 70, 206));
             player.sendMessage("§aWelcome to Futuria!\nIf you want a tutorial, just use /tutorial.");
         }else
             CitySystem.loadPlayer(player);
-
         CityPlayer cPlayer = CitySystem.getCityPlayer(player);
         if (!(config.contains("login_today"))) {
             ArrayList<String> list = new ArrayList<>(); list.add(player.getUniqueId().toString());

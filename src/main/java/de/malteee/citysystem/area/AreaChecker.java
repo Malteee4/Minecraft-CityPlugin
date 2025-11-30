@@ -90,6 +90,7 @@ public class AreaChecker implements Listener {
                             if (a.isPlayerIn(pl.toPlayer())) {
                                 inArea = true;
                                 Area old = pl.getCurrentArea();
+                                pl.setCurrentArea(a);
                                 if (old != null)
                                     if (old.equals(a)) continue;
                                 if (a.getType().equals(Area.AreaType.SPAWN))
@@ -98,21 +99,23 @@ public class AreaChecker implements Listener {
                                     City entered = a.getCity();
                                     if (old == null) {
                                         pl.toPlayer().sendMessage(entered.getWelcomeMessage());
+                                        continue;
                                     }
                                     if (old.getType().equals(Area.AreaType.CITY)) {
                                         City oldCity = old.getCity();
                                         if (oldCity.equals(entered))
                                             continue;
-                                        pl.toPlayer().sendMessage(oldCity.getGoodbyeMessage());
+                                        //pl.toPlayer().sendMessage(oldCity.getGoodbyeMessage());
+                                        //TODO: check for expansion
                                         pl.toPlayer().sendMessage(entered.getWelcomeMessage());
                                     }
                                 }
-                                pl.setCurrentArea(a);
                             }
                         }if (!inArea) {
                             if (pl.getCurrentArea() != null) {
                                 if (pl.getCurrentArea().getType().equals(Area.AreaType.CITY)) {
-                                    pl.toPlayer().sendMessage(pl.getCurrentArea().getCity().getGoodbyeMessage());
+                                    //pl.toPlayer().sendMessage(pl.getCurrentArea().getCity().getGoodbyeMessage());
+                                    //TODO: check for expansion
                                     pl.toPlayer().sendMessage("§7You've entered the wilderness!");
                                 }else if (pl.getCurrentArea().getType().equals(Area.AreaType.SPAWN)) {
                                     pl.toPlayer().sendMessage("§7You've entered the wilderness!");
