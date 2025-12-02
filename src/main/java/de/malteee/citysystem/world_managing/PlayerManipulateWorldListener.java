@@ -25,6 +25,7 @@ import java.util.*;
 public class PlayerManipulateWorldListener implements Listener {
 
     public static HashMap<UUID, Block> creatingCity = new HashMap<>();
+    private static ArrayList<UUID> confirmation = new ArrayList<>();
     private final List<Material> mainNotDropable = Arrays.asList(Material.COAL_ORE, Material.COPPER_ORE, Material.COPPER_ORE, Material.DIAMOND_ORE, Material.EMERALD_ORE, Material.GOLD_ORE,
             Material.DEEPSLATE_COAL_ORE, Material.LAPIS_ORE, Material.DEEPSLATE_DIAMOND_ORE, Material.IRON_ORE, Material.DEEPSLATE_COPPER_ORE, Material.DEEPSLATE_EMERALD_ORE,
             Material.DEEPSLATE_GOLD_ORE, Material.DEEPSLATE_IRON_ORE, Material.DEEPSLATE_LAPIS_ORE, Material.DEEPSLATE_REDSTONE_ORE, Material.REDSTONE_ORE);
@@ -127,15 +128,21 @@ public class PlayerManipulateWorldListener implements Listener {
                     player.sendMessage("§cYour city's name can't be longer than 20 letters!");
                     return;
                 }
-                Location middle = creatingCity.get(player.getUniqueId()).getLocation();
-                Location corner1 = new Location(middle.getWorld(), middle.getBlockX() + 7, middle.getBlockY(), middle.getBlockZ() + 7);
-                Location corner2 = new Location(middle.getWorld(), middle.getBlockX() - 7, middle.getBlockY(), middle.getBlockZ() - 7);
-                Bukkit.broadcastMessage(middle.toString());
-                Area area = new Area(corner1, corner2, Area.AreaType.CITY, cityPlayer.getSuperiorArea(), true);
-                CitySystem.getCm().addCity(new City(name, player, area, middle));
-                creatingCity.get(player.getUniqueId()).setType(Material.AIR);
-                creatingCity.remove(player.getUniqueId());
-                player.sendMessage("§aYour city has been founded!");
+                if (!confirmation.contains(player.getUniqueId())) {
+                    player.sendMessage(""); //TODO
+                    confirmation.add(player.getUniqueId());
+                }else if(event.getMessage().equalsIgnoreCase("confirm")) {
+                    confirmation.remove(player.getUniqueId());
+                    Location middle = creatingCity.get(player.getUniqueId()).getLocation();
+                    Location corner1 = new Location(middle.getWorld(), middle.getBlockX() + 7, middle.getBlockY(), middle.getBlockZ() + 7);
+                    Location corner2 = new Location(middle.getWorld(), middle.getBlockX() - 7, middle.getBlockY(), middle.getBlockZ() - 7);
+                    Bukkit.broadcastMessage(middle.toString());
+                    Area area = new Area(corner1, corner2, Area.AreaType.CITY, cityPlayer.getSuperiorArea(), true);
+                    CitySystem.getCm().addCity(new City(name, player, area, middle));
+                    creatingCity.get(player.getUniqueId()).setType(Material.AIR);
+                    creatingCity.remove(player.getUniqueId());
+                    player.sendMessage("§aYour city has been founded!");
+                }
             });
         }
     }

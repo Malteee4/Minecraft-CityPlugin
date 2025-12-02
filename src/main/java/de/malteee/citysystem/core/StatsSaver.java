@@ -14,14 +14,25 @@ import java.util.UUID;
 
 public class StatsSaver implements Listener {
 
-    private HashMap<UUID, Integer> temp_block_breaks = new HashMap<>();
-    private HashMap<UUID, Integer> temp_block_places = new HashMap<>();
-    private HashMap<UUID, Integer> temp_entity_kills = new HashMap<>();
-    private HashMap<UUID, Integer> temp_player_kills = new HashMap<>();
+    private static HashMap<UUID, Integer> temp_block_breaks = new HashMap<>();
+    private static HashMap<UUID, Integer> temp_block_places = new HashMap<>();
+    private static  HashMap<UUID, Integer> temp_entity_kills = new HashMap<>();
+    private static HashMap<UUID, Integer> temp_player_kills = new HashMap<>();
+    private static HashMap<UUID, Integer> temp_deaths = new HashMap<>();
+    private static HashMap<UUID, Integer> temp_distance = new HashMap<>();
 
     public static void initializeStats(UUID player) {
         if (statsExist(player)) {
-
+            try {
+                ResultSet rs = CitySystem.getDatabase().getResult("SELECT * FROM tbl_player_stats WHERE PLAYER_ID = '" + player.toString() + "'");
+                rs.next();
+                temp_block_breaks.put(player, rs.getInt("BLOCK_BREAK"));
+                temp_block_places.put(player, rs.getInt("BLOCK_PLACE"));
+                temp_entity_kills.put(player, rs.getInt("ENTITY_KILL"));
+                temp_player_kills.put(player, rs.getInt("PLAYER_KILL"));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }else {
             try {
                 CitySystem.getDatabase().execute("INSERT INTO tbl_player_stats(PLAYER_ID, BLOCK_BREAK, BLOCK_PLACE, ENTITY_KILL, PLAYER_KILL, DEATHS, DISTANCE)" +
