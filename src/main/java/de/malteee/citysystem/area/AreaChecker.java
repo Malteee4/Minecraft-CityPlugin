@@ -22,6 +22,8 @@ public class AreaChecker implements Listener {
     public static HashSet<Area> areas = new HashSet<>();
 
     public static void initializeAreas() {
+        superiorAreas = new ArrayList<>();
+        areas = new HashSet<>();
         try {
             ResultSet rs = CitySystem.getDatabase().getResult("SELECT * FROM tbl_superior_areas");
             while (rs.next()) {

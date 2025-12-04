@@ -77,7 +77,6 @@ public class City implements Listener {
                 }
             }
             rs.close();
-
             this.name = id;
         }catch (Exception exception) {
             exception.printStackTrace();
@@ -125,6 +124,19 @@ public class City implements Listener {
         return areas;
     }
 
+    public boolean delete() {
+        try {
+            for (Area area : areas)
+                area.delete();
+            Database db = CitySystem.getDatabase();
+            db.execute("DELETE FROM tbl_city WHERE CITY_ID='" + name + "'");
+            db.execute("DELETE FROM tbl_city_areas WHERE CITY_ID='" + name + "'");
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
     enum Expansion {
 
         WELCOME_MSG(1, "Welcome message"),
@@ -135,7 +147,6 @@ public class City implements Listener {
         Expansion(int id, String name) {
 
         }
-
     }
 
     enum Stage {

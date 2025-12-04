@@ -2,6 +2,7 @@ package de.malteee.citysystem.commands_city;
 
 import de.malteee.citysystem.CitySystem;
 import de.malteee.citysystem.area.Area;
+import de.malteee.citysystem.area.AreaChecker;
 import de.malteee.citysystem.core.City;
 import de.malteee.citysystem.core.CityPlayer;
 import de.malteee.citysystem.money_system.Konto;
@@ -33,6 +34,7 @@ public class CityCommand implements CommandExecutor {
                 player.sendMessage("§aYou've successfully bought a city foundation stone! Place it on the ground to found a city!");
             }
             case "info" -> {
+                //TODO: gui with general information, button to change name, button to set spawn, button to plot overview
                 if (cPlayer.getCurrentArea() == null) return false;
                 if (cPlayer.getCurrentArea().getType().equals(Area.AreaType.CITY)) {
                     City city = cPlayer.getCurrentArea().getCity();
@@ -41,7 +43,12 @@ public class CityCommand implements CommandExecutor {
                             "  §r§7stage: §o" + "\n" +
                             "  §r§7residential plots: §o0/2" + "\n" +
                             "  §r§7shop plots: §o---");
+                }else {
+                    player.sendMessage("§cYou're currently not in a city!");
                 }
+            }
+            case "settings" -> {
+                //TODO: gui for settings
             }
             case "expand" -> {
 
@@ -66,8 +73,22 @@ public class CityCommand implements CommandExecutor {
             case "markarea" -> {
 
             }
-            case "overview" -> {
-                //TODO: gui with general information, button to change name, button to set spawn, button to plot overview
+            case "delete" -> {
+                if (!player.hasPermission("CitySystem.city.delete")) {
+                    player.sendMessage("§cYou don't have the permission to use this command");
+                    return false;
+                }
+                if (cPlayer.getCurrentArea().getType().equals(Area.AreaType.CITY)) {
+                    City city = cPlayer.getCurrentArea().getCity();
+                    if (city.delete())
+                        player.sendMessage("§aCity has been deleted!");
+                    else
+                        player.sendMessage("§cSomething went wrong deleting the city!");
+                    AreaChecker.initializeAreas();
+                }else {
+                    player.sendMessage("§c You're currently not in a city!");
+                }
+
             }
         }
         return false;

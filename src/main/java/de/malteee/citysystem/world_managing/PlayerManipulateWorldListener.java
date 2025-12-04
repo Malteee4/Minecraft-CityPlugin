@@ -113,9 +113,10 @@ public class PlayerManipulateWorldListener implements Listener {
     public void handlePlayerChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
         CityPlayer cityPlayer = CitySystem.getCityPlayer(player);
-        if (creatingCity.containsKey(player.getUniqueId())) {
+        if (creatingCity.containsKey(player.getUniqueId()))
             event.setCancelled(true);
-            Bukkit.getScheduler().runTask(CitySystem.getPlugin(), () -> {
+        Bukkit.getScheduler().runTask(CitySystem.getPlugin(), () -> {
+            if (creatingCity.containsKey(player.getUniqueId())) {
                 String name = event.getMessage();
                 if (name.equalsIgnoreCase("cancel")) {
                     creatingCity.get(player.getUniqueId()).setType(Material.AIR);
@@ -123,28 +124,34 @@ public class PlayerManipulateWorldListener implements Listener {
                     player.getInventory().addItem(new ItemBuilder(Material.BEDROCK, 1).setName("§6§lFoundation Stone").setLore("§7§oPlace in the Mainworld to found a city!").build());
                     player.sendMessage("§eYour action has been canceled!");
                     //TODO: full inventory
+                    return;
                 }
                 if (name.length() > 20) {
                     player.sendMessage("§cYour city's name can't be longer than 20 letters!");
                     return;
+                }if (CitySystem.getCm().getCityNames().contains(name.toLowerCase())) {
+                    player.sendMessage("§cThis name has already been taken!");
+                    return;
                 }
-                if (!confirmation.contains(player.getUniqueId())) {
-                    player.sendMessage(""); //TODO
-                    confirmation.add(player.getUniqueId());
-                }else if(event.getMessage().equalsIgnoreCase("confirm")) {
+                //TODO: check for unallowed names!
+                if(event.getMessage().equalsIgnoreCase("confirm") && confirmation.contains(player.getUniqueId())) {
                     confirmation.remove(player.getUniqueId());
                     Location middle = creatingCity.get(player.getUniqueId()).getLocation();
                     Location corner1 = new Location(middle.getWorld(), middle.getBlockX() + 7, middle.getBlockY(), middle.getBlockZ() + 7);
                     Location corner2 = new Location(middle.getWorld(), middle.getBlockX() - 7, middle.getBlockY(), middle.getBlockZ() - 7);
-                    Bukkit.broadcastMessage(middle.toString());
                     Area area = new Area(corner1, corner2, Area.AreaType.CITY, cityPlayer.getSuperiorArea(), true);
                     CitySystem.getCm().addCity(new City(name, player, area, middle));
                     creatingCity.get(player.getUniqueId()).setType(Material.AIR);
                     creatingCity.remove(player.getUniqueId());
                     player.sendMessage("§aYour city has been founded!");
+                }else {
+                    player.sendMessage("§aType \"confirm\" into the chat to create your city §l" + name + "§r§a§o, cancel to cancel or a new name for your city!");
+                    if (!confirmation.contains(player.getUniqueId())) {
+                        confirmation.add(player.getUniqueId());
+                    }
                 }
-            });
-        }
+            }
+        });
     }
 
     @EventHandler
