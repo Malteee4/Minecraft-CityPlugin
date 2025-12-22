@@ -144,6 +144,38 @@ public class AreaChecker implements Listener {
         return area.orElse(null);
     }
 
+    public static boolean isAdjacent(Area area, Location loc1, Location loc2) {
+        int xMin = Math.min(loc1.getBlockX(), loc2.getBlockX());
+        int zMin = Math.min(loc1.getBlockZ(), loc2.getBlockZ());
+        int xMax = Math.max(loc1.getBlockX(), loc2.getBlockX());
+        int zMax = Math.max(loc1.getBlockZ(), loc2.getBlockZ());
+
+        return xMin == (area.getMinX() - 1) || xMax == (area.getMaxX()) + 1 || zMin == (area.getMinZ() - 1) || zMax == (area.getMaxZ() + 1);
+    }
+
+    public static boolean partOfXZ(Area area, Location loc1, Location loc2) {
+        for (int x = (Math.max(loc1.getBlockX(), loc2.getBlockX())); x >= Math.min(loc2.getBlockX(), loc1.getBlockX()); x--) {
+            for (int z = Math.max(loc1.getBlockZ(), loc2.getBlockZ()); z >= Math.min(loc2.getBlockZ(), loc1.getBlockZ()); z--) {
+                Location check = new Location(loc1.getWorld(), x, 100, z);
+                if (area.partOf(check)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    public static boolean partOfArea(Location corner1, Location corner2) {
+        for (int x = Math.max(corner1.getBlockX(),corner2.getBlockX()); x >= Math.min(corner2.getBlockX(), corner1.getBlockX()); x--) {
+            for (int z = Math.max(corner1.getBlockZ(), corner2.getBlockZ()); z >= Math.min(corner2.getBlockZ(), corner1.getBlockZ()); z--) {
+                Location check = new Location(corner1.getWorld(), x, 100, z);
+                if (AreaChecker.getAreaByLocation(check) != null) {
+                    return true;
+                }
+            }
+        }return false;
+    }
+
     public static SuperiorArea getSuperiorByLocation(Location location) {
 
         return null;

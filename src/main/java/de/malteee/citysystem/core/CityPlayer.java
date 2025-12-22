@@ -154,6 +154,10 @@ public class CityPlayer {
        return !(markedLocations[index] == null);
     }
 
+    public Location[] getMarkedLocations() {
+       return markedLocations;
+    }
+
     public int getDaysActive() {
         return daysActive;
     }

@@ -126,6 +126,10 @@ public class City implements Listener {
         return areas;
     }
 
+    public Stage getStage() {
+        return stage;
+    }
+
     public boolean delete() {
         try {
             for (Area area : areas)
@@ -147,20 +151,6 @@ public class City implements Listener {
 
 
         Expansion(int id, String name) {
-
-        }
-    }
-
-    enum Stage {
-
-        SETTLEMENT(2, 0, 0),
-        VILLAGE(4, 1, 0),
-        SMALL_TOWN(8, 4, 1),
-        CITY(15, 8, 2),
-        BIG_CITY(20, 10, 2),
-        METROPOLIS(28, 14, 4);
-
-        Stage(int residential, int shops, int farms) {
 
         }
     }

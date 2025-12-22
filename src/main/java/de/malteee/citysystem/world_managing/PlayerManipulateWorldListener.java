@@ -138,7 +138,7 @@ public class PlayerManipulateWorldListener implements Listener {
                 if (name.length() > 20) {
                     player.sendMessage("§cYour city's name can't be longer than 20 letters!");
                     return;
-                }if (CitySystem.getCm().getCityNames().contains(name.toLowerCase())) {
+                }if (CitySystem.getCm().getCityNames().contains(name.toLowerCase()) && !name.equalsIgnoreCase("confirm")) {
                     player.sendMessage("§cThis name has already been taken!");
                     return;
                 }
