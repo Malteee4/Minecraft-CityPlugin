@@ -20,7 +20,7 @@ public class City implements Listener {
 
     private String name, welcome, goodbye;
     private UUID owner;
-    private ArrayList<Player> buildingRight = new ArrayList<>();
+    private ArrayList<UUID> buildingRight = new ArrayList<>();
     private List<Expansion> expansions = new ArrayList<>();
 
     private List<Area> areas = new ArrayList<>();
@@ -47,6 +47,7 @@ public class City implements Listener {
             this.welcome = "You've entered a city!";
             this.spawnpoint = position;
             this.stage = Stage.SETTLEMENT;
+            this.buildingRight.add(owner.getUniqueId());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -62,6 +63,7 @@ public class City implements Listener {
                 this.spawnpoint = Tools.getLocFromString(rs.getString("SPAWN"), CitySystem.getPlugin());
                 this.daysActive = rs.getInt("DAYS_ACTIVE");
                 this.publicSpawn = rs.getBoolean("PUBLIC_SPAWN");
+                this.buildingRight.add(this.owner);
                 try {
                     this.stage = Stage.valueOf(rs.getString("STAGE"));
                 } catch (Exception e) {
@@ -116,7 +118,7 @@ public class City implements Listener {
         return owner;
     }
 
-    public ArrayList<Player> getBuilding_right() {
+    public ArrayList<UUID> getBuilding_right() {
         return buildingRight;
     }
 

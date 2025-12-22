@@ -17,7 +17,9 @@ public class Database {
             System.out.println("Sqlite connected!");
             con.prepareStatement("CREATE TABLE IF NOT EXISTS tbl_properties(CODE varchar(20), VALUE varchar(60))").execute();
             con.prepareStatement("CREATE TABLE IF NOT EXISTS tbl_players(PLAYER_ID varchar(40), MONEY int, JOB varchar(20), RANK varchar(20), HOME varchar(40))").execute();
-            //con.prepareStatement(CREATE TABLE IF NOT EXISTS tbl_jobs(PLAYER_ID varchar(40), LUMBERJACK_EXP int, FISHER_EXP int, HUNTER_EXP int, BUILDER_EXP int, MINER_EXP int, TRADER_EXP int)).execute();
+            con.prepareStatement("CREATE TABLE IF NOT EXISTS tbl_jobs(PLAYER_ID varchar(40), LUMBERJACK_EXP varchar(40), FISHER_EXP varchar(40), HUNTER_EXP varchar(40), BUILDER_EXP varchar(40), " +
+                    "MINER_EXP varchar(40), TRADER_EXP varchar(40))").execute();    //(exp,money)
+
             con.prepareStatement("CREATE TABLE IF NOT EXISTS tbl_player_stats(PLAYER_ID varchar(40), BLOCK_BREAK int, BLOCK_PLACE int, " +
                     "ENTITY_KILL int, PLAYER_KILL int, DEATHS int, DISTANCE int)").execute();
 

@@ -112,6 +112,9 @@ public class AreaChecker implements Listener {
                                         pl.toPlayer().sendMessage(entered.getWelcomeMessage());
                                     }
                                 }
+                                if (a.getType().equals(Area.AreaType.PLOT)) {
+                                    //plot areas are on top of city areas!
+                                }
                             }
                         }if (!inArea) {
                             if (pl.getCurrentArea() != null) {

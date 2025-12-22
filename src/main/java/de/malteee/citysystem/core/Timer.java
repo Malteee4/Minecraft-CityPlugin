@@ -21,16 +21,15 @@ public class Timer {
             String day = LocalDate.now().getDayOfMonth() + "." + LocalDate.now().getMonth().getValue();
             if (!config.contains("last_day_saved")) config.set("last_day_saved", day);
             if (!config.getString("last_day_saved").equalsIgnoreCase(day)) {
-                reset = true;
                 List<String> login = config.getStringList("login_today");
-                for (String str : config.getStringList("active")) {
+                for (String str : config.getStringList("active.list")) {
                     if (!login.contains(str))
                         config.set("active." + str, (int) (Math.sqrt(4 * config.getInt("active." + str)) - 1));
                 }
                 config.set("login_today", new ArrayList<>());
                 config.set("last_day_saved", day);
-                /*for (String uuid : config.getStringList("job_cooldown"))
-                    config.set("job_cooldown." + uuid, Math.max(config.getInt("job_cooldown." + uuid) - 1, 0));*/
+                for (String uuid : config.getStringList("job_cooldown.list"))
+                    config.set("job_cooldown." + uuid, Math.max(config.getInt("job_cooldown." + uuid) - 1, 0));
                 CitySystem.getPlugin().saveConfig();
                 reset = true;
             }
@@ -38,6 +37,7 @@ public class Timer {
             for (CityPlayer cPlayer : CitySystem.getCityPlayers()) {
                 Konto konto = mm.getKonto(cPlayer);
                 if (reset) {
+                    cPlayer.setJobCooldown(config);
                     konto.clearMot();
                     cPlayer.setBlocksWilderness(0);
                 }

@@ -9,6 +9,7 @@ public class Residential extends Plot implements Rentable {
 
     protected Residential(String id, City city) {
         super(id, city);
+
     }
 
     @Override

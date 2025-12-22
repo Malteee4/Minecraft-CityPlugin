@@ -14,6 +14,7 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
+import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.*;
@@ -33,8 +34,14 @@ public class PlayerManipulateWorldListener implements Listener {
     public boolean isAllowedToManipulate(Player player, Location location) {
         if (player.hasPermission("citysystem.unrestricted_building")) return true;
         CityPlayer cPlayer = CitySystem.getCityPlayer(player);
-        if (player.getWorld().equals(CitySystem.spawnWorld) || cPlayer.getCurrentArea().getType().equals(Area.AreaType.SPAWN)) {
+        Area locArea = AreaChecker.getAreaByLocation(location);
+        if (locArea == null) return true;
+        if (player.getWorld().equals(CitySystem.spawnWorld) || locArea.getType().equals(Area.AreaType.SPAWN)) {
             return false;
+        }if (locArea.getType().equals(Area.AreaType.CITY)) {
+            return locArea.getCity().getBuilding_right().contains(player.getUniqueId());
+        }else if (locArea.getType().equals(Area.AreaType.PLOT)) {
+            return locArea.getPlot().getBuildingRights().contains(player.getUniqueId());
         }
         return true;
     }
@@ -51,13 +58,15 @@ public class PlayerManipulateWorldListener implements Listener {
     public void handlePlayerBreakBlock(BlockBreakEvent event) {
         Player player = event.getPlayer();
         CityPlayer cPlayer = CitySystem.getCityPlayer(player);
+        if (cPlayer == null) return;
         if (player.hasPermission("citysystem.unrestricted_building")) return;
         event.setCancelled(!isAllowedToManipulate(player, event.getBlock().getLocation()));
         if (player.getWorld().equals(CitySystem.mainWorld)) {
-            if (cPlayer.isInWilderness()) {
-                if (cPlayer.getBlocksInWilderness() == CityPlayer.BLOCKS_MAX) {
-                    //TODO: message -> building limit in wilderness
+            if (AreaChecker.getAreaByLocation(event.getBlock().getLocation()) == null) {
+                if (cPlayer.getBlocksInWilderness() >= CityPlayer.BLOCKS_MAX) {
                     event.setCancelled(true);
+                    player.sendMessage("§cYou can only break or place " + CityPlayer.BLOCKS_MAX + " blocks in the wilderness per day!");
+                    return;
                 }else {
                     cPlayer.setBlocksWilderness(cPlayer.getBlocksInWilderness() + 1);
                 }
@@ -66,7 +75,6 @@ public class PlayerManipulateWorldListener implements Listener {
                 event.setDropItems(false);
         }
         event.setCancelled(jobCheck(cPlayer, event.getBlock().getType()));
-
     }
 
     @EventHandler
@@ -99,10 +107,11 @@ public class PlayerManipulateWorldListener implements Listener {
         if (player.hasPermission("citysystem.unrestricted_building")) return;
         event.setCancelled(!isAllowedToManipulate(player, event.getBlock().getLocation()));
         if(cPlayer.toPlayer().getWorld().equals(CitySystem.mainWorld)) {
-            if (!cPlayer.isInWilderness()) return;
-            if (cPlayer.getBlocksInWilderness() == CityPlayer.BLOCKS_MAX) {
+            if (AreaChecker.getAreaByLocation(event.getBlock().getLocation()) != null) return;
+            if (cPlayer.getBlocksInWilderness() >= CityPlayer.BLOCKS_MAX) {
                 event.setCancelled(true);
                 player.sendMessage("§cYou can only break or place " + CityPlayer.BLOCKS_MAX + " blocks in the wilderness per day!");
+                return;
             }else {
                 cPlayer.setBlocksWilderness(cPlayer.getBlocksInWilderness() + 1);
             }
@@ -170,14 +179,17 @@ public class PlayerManipulateWorldListener implements Listener {
     public void onPlayerInteractAtEntity(PlayerInteractEntityEvent event) {
         Player player = event.getPlayer();
         if (player.hasPermission("citysystem.unrestricted_building")) return;
-        event.setCancelled(!isAllowedToManipulate(player, player.getLocation()));
+        event.setCancelled(!isAllowedToManipulate(player, event.getRightClicked().getLocation()));
     }
 
     @EventHandler
     public void onPlayerDestroyFarmland(PlayerInteractEvent event) {
         Player player = event.getPlayer();
         if (player.hasPermission("citysystem.unrestricted_building")) return;
-        event.setCancelled(!isAllowedToManipulate(player, player.getLocation()));
+        /*if(event.getAction() == Action.PHYSICAL && event.getClickedBlock().getType() == Material.FARMLAND)
+            event.setCancelled(true);*/
+        if (event.getClickedBlock() == null) return;
+        event.setCancelled(!isAllowedToManipulate(player, event.getClickedBlock().getLocation()));
     }
 
     @EventHandler

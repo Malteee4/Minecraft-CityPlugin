@@ -11,38 +11,44 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class CityPlayer {
 
-    private Player player;
+    private final Player player;
+    private final UUID uuid;
+
     private Residential residential;
     private Area currentArea;
     private SuperiorArea superiorArea;
     private Job job;
     private Location homePoint;
 
-    public static final int BLOCKS_MAX = 100;
-    private int blocks_wild = 0, days_active, job_cooldown;   //there is a maximum of how many blocks you're allowed to break and place in the wilderness
+    public static final int BLOCKS_MAX = 60;
+    private int blocksWild = 0, daysActive, jobCooldown;   //there is a maximum of how many blocks you're allowed to break and place in the wilderness
     private boolean buildAllowed, inWilderness;
 
     private Location[] markedLocations = new Location[2];
 
    public CityPlayer(Player player) {
         this.player = player;
+        this.uuid = player.getUniqueId();
         try {
-            ResultSet rs = CitySystem.getDatabase().getCon().prepareStatement("SELECT * FROM tbl_players WHERE PLAYER_ID = '" + player.getUniqueId().toString() + "'").executeQuery();
+            ResultSet rs = CitySystem.getDatabase().getResult("SELECT * FROM tbl_players WHERE PLAYER_ID = '" + player.getUniqueId().toString() + "'");
             rs.next();
             if (!rs.getString("HOME").equalsIgnoreCase("NONE"))
                 homePoint = Tools.getLocFromString(rs.getString("HOME"), CitySystem.getPlugin());
-            //TODO: job
+            this.job = Job.valueOf(rs.getString("JOB"));
             FileConfiguration config = CitySystem.getPlugin().getConfig();
             if (!config.contains("active." + player.getUniqueId().toString()))
                 config.set("active." + player.getUniqueId().toString(), 0);
-            days_active = config.getInt("active." + player.getUniqueId().toString());
-            if (config.contains("job_cooldown." + player.getUniqueId().toString()))
-                job_cooldown = config.getInt("job_cooldown." + player.getUniqueId().toString());
+            daysActive = config.getInt("active." + player.getUniqueId().toString());
+            if (config.contains("job_cooldown." + uuid.toString()))
+                jobCooldown = config.getInt("job_cooldown." + uuid.toString());
             else
-                job_cooldown = 0;
+                jobCooldown = 0;
             CitySystem.getPlugin().saveConfig();
             rs.close();
         }catch (Exception exception) {
@@ -67,11 +73,11 @@ public class CityPlayer {
     }
 
     public int getBlocksInWilderness() {
-        return blocks_wild;
+        return blocksWild;
     }
 
     public void setBlocksWilderness(int i) {
-        blocks_wild = i;
+        blocksWild = i;
     }
 
     public void setSuperiorArea(SuperiorArea area) {
@@ -103,15 +109,41 @@ public class CityPlayer {
     }
 
     public boolean hasJob() {
-       return job == null;
+       return job != null;
     }
 
     public int getJobCooldown() {
-       return job_cooldown;
+       return jobCooldown;
+    }
+
+    public void setJobCooldown(FileConfiguration config) {
+        if (config.contains("job_cooldown." + uuid.toString()))
+            jobCooldown = config.getInt("job_cooldown." + uuid.toString());
+        else
+            jobCooldown = 0;
     }
 
     public void setJob(Job job) {
-       this.job = job;
+        FileConfiguration config = CitySystem.getPlugin().getConfig();
+        if (!config.contains("job_cooldown." + uuid.toString())) {
+            if (!config.contains("job_cooldown.list")) {
+                List<String> list = new ArrayList<>();
+                list.add(uuid.toString());
+                config.set("job_cooldown.list", list);
+            }else {
+                List<String> list = config.getStringList("job_cooldown.list");
+                list.add(uuid.toString());
+                config.set("job_cooldown.list", list);
+            }
+        }
+        config.set("job_cooldown." + uuid.toString(), 5);
+        CitySystem.getPlugin().saveConfig();
+        try {
+            CitySystem.getDatabase().execute("UPDATE tbl_players SET JOB='" + job.toString() + "' WHERE PLAYER_ID='" + this.uuid.toString() + "'");
+        }catch (Exception exception) {
+            exception.printStackTrace();
+        }
+        this.job = job;
     }
 
     public void setMarked(Location loc, int index) {
@@ -123,7 +155,7 @@ public class CityPlayer {
     }
 
     public int getDaysActive() {
-        return days_active;
+        return daysActive;
     }
 
     public void setHomePoint(Location home) {

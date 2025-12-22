@@ -50,8 +50,9 @@ public class ItemBuilder {
         itemStack.setItemMeta(itemMeta);
         return itemStack;
     }
-    public ItemBuilder addEnchantment(final @Nonnull Enchantment enchantment, final int level) {
-        this.itemStack.addEnchantment(enchantment, level);
+    public ItemBuilder addEnchantment(final @Nonnull Enchantment enchantment, final int level, final boolean add) {
+        if (add)
+            this.itemStack.addEnchantment(enchantment, level);
         return this;
     }
 
