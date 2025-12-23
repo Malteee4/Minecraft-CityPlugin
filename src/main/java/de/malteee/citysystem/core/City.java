@@ -130,6 +130,15 @@ public class City implements Listener {
         return stage;
     }
 
+    public boolean hasExpansion(Expansion expansion) {
+        return expansions.contains(expansion);
+    }
+
+    public void addArea(Area area) {
+        CitySystem.getDatabase().execute("INSERT INTO tbl_city_areas(CITY_ID, AREA_ID) VALUES('" + name + "', '" + area.getId() + "')");
+        this.areas.add(area);
+    }
+
     public boolean delete() {
         try {
             for (Area area : areas)
@@ -140,18 +149,6 @@ public class City implements Listener {
             return true;
         } catch (Exception e) {
             return false;
-        }
-    }
-
-    enum Expansion {
-
-        WELCOME_MSG(1, "Welcome message"),
-        GOODBYE_MSG(2, "Goodbye message"),
-        SPAWNPOINT(3, "Spawnpoint");
-
-
-        Expansion(int id, String name) {
-
         }
     }
 }

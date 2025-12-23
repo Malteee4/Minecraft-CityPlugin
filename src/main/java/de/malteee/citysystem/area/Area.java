@@ -34,6 +34,7 @@ public class Area implements Listener {
 
         if (type != AreaType.SUPERIOR) {
             if (create) {
+                AreaChecker.areas.add(this);
                 try {
                     CitySystem.getDatabase().execute("INSERT INTO tbl_areas(AREA_ID, TYPE, LOC1, LOC2, SUPERIOR) VALUES('" + id + "', '" + type.toString() +
                             "', '" + Tools.locationToString(loc1) + "', '" + Tools.locationToString(loc2) + "', '" + superior.getId() + "')");
@@ -137,6 +138,10 @@ public class Area implements Listener {
         locations[2] = new Location(world, this.xMax, this.yMin, this.zMin);
         locations[3] = new Location(world, this.xMax, this.yMax, this.zMin);
         return locations;
+    }
+
+    public int getSurface() {
+        return (xMax - xMin + 1) * (zMax - zMin + 1);
     }
 
     public enum AreaType {

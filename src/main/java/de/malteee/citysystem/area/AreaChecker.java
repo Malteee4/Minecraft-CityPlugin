@@ -150,7 +150,10 @@ public class AreaChecker implements Listener {
         int xMax = Math.max(loc1.getBlockX(), loc2.getBlockX());
         int zMax = Math.max(loc1.getBlockZ(), loc2.getBlockZ());
 
-        return xMin == (area.getMinX() - 1) || xMax == (area.getMaxX()) + 1 || zMin == (area.getMinZ() - 1) || zMax == (area.getMaxZ() + 1);
+        int areaXMin = area.getMinX(), areaXMax = area.getMaxX(), areaZMax = area.getMaxZ(), areaZMin = area.getMinZ();
+
+        return (xMin == (area.getMaxX() + 1) && (zMax >= areaZMin && zMin <= areaZMax)) || (xMax == (area.getMinX() - 1)  && (zMax >= areaZMin && zMin <= areaZMax))
+                || (zMin == (area.getMaxZ() + 1) && (xMax >= areaXMin && xMin <= areaXMax)) || (zMax == (area.getMinZ() - 1) && (xMax >= areaXMin && xMin <= areaXMax));
     }
 
     public static boolean partOfXZ(Area area, Location loc1, Location loc2) {
@@ -177,8 +180,8 @@ public class AreaChecker implements Listener {
     }
 
     public static SuperiorArea getSuperiorByLocation(Location location) {
-
-        return null;
+        Optional<SuperiorArea> area = superiorAreas.stream().filter(a -> a.partOf(location)).findFirst();
+        return area.orElse(null);
     }
     /*@EventHandler
     public void handlePlayerMove(PlayerMoveEvent event) {

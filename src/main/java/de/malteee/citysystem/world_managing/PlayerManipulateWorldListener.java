@@ -26,7 +26,7 @@ import java.util.*;
 public class PlayerManipulateWorldListener implements Listener {
 
     public static HashMap<UUID, Block> creatingCity = new HashMap<>();
-    private static ArrayList<UUID> confirmation = new ArrayList<>();
+    private static HashMap<UUID, String> confirmation = new HashMap<>();
     private final List<Material> mainNotDropable = Arrays.asList(Material.COAL_ORE, Material.COPPER_ORE, Material.COPPER_ORE, Material.DIAMOND_ORE, Material.EMERALD_ORE, Material.GOLD_ORE,
             Material.DEEPSLATE_COAL_ORE, Material.LAPIS_ORE, Material.DEEPSLATE_DIAMOND_ORE, Material.IRON_ORE, Material.DEEPSLATE_COPPER_ORE, Material.DEEPSLATE_EMERALD_ORE,
             Material.DEEPSLATE_GOLD_ORE, Material.DEEPSLATE_IRON_ORE, Material.DEEPSLATE_LAPIS_ORE, Material.DEEPSLATE_REDSTONE_ORE, Material.REDSTONE_ORE);
@@ -74,7 +74,8 @@ public class PlayerManipulateWorldListener implements Listener {
             if (mainNotDropable.contains(event.getBlock().getType()))
                 event.setDropItems(false);
         }
-        event.setCancelled(jobCheck(cPlayer, event.getBlock().getType()));
+        if (player.getWorld().equals(CitySystem.farmWorld))
+            event.setCancelled(jobCheck(cPlayer, event.getBlock().getType()));
     }
 
     @EventHandler
@@ -143,20 +144,20 @@ public class PlayerManipulateWorldListener implements Listener {
                     return;
                 }
                 //TODO: check for unallowed names!
-                if(event.getMessage().equalsIgnoreCase("confirm") && confirmation.contains(player.getUniqueId())) {
-                    confirmation.remove(player.getUniqueId());
+                if(event.getMessage().equalsIgnoreCase("confirm") && confirmation.containsKey(player.getUniqueId())) {
                     Location middle = creatingCity.get(player.getUniqueId()).getLocation();
                     Location corner1 = new Location(middle.getWorld(), middle.getBlockX() + 7, middle.getBlockY(), middle.getBlockZ() + 7);
                     Location corner2 = new Location(middle.getWorld(), middle.getBlockX() - 7, middle.getBlockY(), middle.getBlockZ() - 7);
                     Area area = new Area(corner1, corner2, Area.AreaType.CITY, cityPlayer.getSuperiorArea(), true);
-                    CitySystem.getCm().addCity(new City(name, player, area, middle));
+                    CitySystem.getCm().addCity(new City(confirmation.get(player.getUniqueId()), player, area, middle));
                     creatingCity.get(player.getUniqueId()).setType(Material.AIR);
                     creatingCity.remove(player.getUniqueId());
+                    confirmation.remove(player.getUniqueId());
                     player.sendMessage("§aYour city has been founded!");
                 }else {
                     player.sendMessage("§aType \"confirm\" into the chat to create your city §l" + name + "§r§a§o, cancel to cancel or a new name for your city!");
-                    if (!confirmation.contains(player.getUniqueId())) {
-                        confirmation.add(player.getUniqueId());
+                    if (!confirmation.containsKey(player.getUniqueId())) {
+                        confirmation.put(player.getUniqueId(), name);
                     }
                 }
             }

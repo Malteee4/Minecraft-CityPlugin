@@ -12,12 +12,14 @@ import de.malteee.citysystem.commands_general.*;
 import de.malteee.citysystem.core.*;
 import de.malteee.citysystem.core.Database;
 import de.malteee.citysystem.jobs.JobCommand;
+import de.malteee.citysystem.jobs.JobManager;
 import de.malteee.citysystem.money_system.MoneyManager;
 import de.malteee.citysystem.plots.PlotManager;
 import de.malteee.citysystem.utilities.*;
 import de.malteee.citysystem.chat.PlayerChatListener;
 import de.malteee.citysystem.world_managing.*;
 import org.bukkit.*;
+import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -61,13 +63,17 @@ public class CitySystem extends JavaPlugin {
         pluginManager.registerEvents(new HologramCommand(), this);
         pluginManager.registerEvents(new PlayerDeathListener(), this);
         pluginManager.registerEvents(new AreaCreator(), this);
+        pluginManager.registerEvents(new JobManager(), this);
 
+        TabCompleter tabCompleter = new TabComplete();
         getCommand("spawn").setExecutor(new WorldSpawnCommand());
         getCommand("setSpawn").setExecutor(new SetWorldSpawnCommand());
         getCommand("breakShop").setExecutor(new BreakShopCommand());
         getCommand("world").setExecutor(new WorldCreation());
         getCommand("money").setExecutor(new MoneyCommand());
+        getCommand("money").setTabCompleter(tabCompleter);
         getCommand("home").setExecutor(new HomeCommand());
+        getCommand("home").setTabCompleter(tabCompleter);
         getCommand("farmWorld").setExecutor(new FarmworldCommand());
         getCommand("mainWorld").setExecutor(new MainWorldCommand());
         getCommand("createSuperiorArea").setExecutor(new CreateSuperiorArea());
@@ -76,12 +82,14 @@ public class CitySystem extends JavaPlugin {
         getCommand("pos2").setExecutor(new PosCommand());
         getCommand("msg").setExecutor(new MsgCommand());
         getCommand("city").setExecutor(new CityCommand());
+        getCommand("city").setTabCompleter(tabCompleter);
         getCommand("setMainSpawn").setExecutor(new SetMainWorldSpawnCommand());
         getCommand("tutorial").setExecutor(new TutorialCommand());
         getCommand("database").setExecutor(new DatabaseCommand());
         getCommand("mot").setExecutor(new MotCommand());
         getCommand("loginStreak").setExecutor(new LoginBonusCommand());
         getCommand("jobs").setExecutor(new JobCommand());
+        getCommand("stats").setExecutor(new StatsCommand());
 
         for(int i = 0; i < maps.size(); i++) {
             if (maps.get(i).equalsIgnoreCase("mainWorld")) {

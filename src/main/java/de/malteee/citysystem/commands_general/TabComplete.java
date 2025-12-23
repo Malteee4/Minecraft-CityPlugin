@@ -2,11 +2,13 @@ package de.malteee.citysystem.commands_general;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.TabCompleter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
-public class TabCompleter implements org.bukkit.command.TabCompleter {
+public class TabComplete implements TabCompleter {
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String label, String[] args) {
@@ -15,7 +17,13 @@ public class TabCompleter implements org.bukkit.command.TabCompleter {
             case 0 -> {
                 switch (label.toLowerCase()) {
                     case "city" -> {
-
+                        list.addAll(Arrays.asList("info", "buy", "settings", "tp"));
+                    }
+                    case "home" -> {
+                        list.add("set");
+                    }
+                    case "money" -> {
+                        list.add("send");
                     }
                 }
             }
@@ -34,6 +42,6 @@ public class TabCompleter implements org.bukkit.command.TabCompleter {
                 }
             }
         }
-        return List.of();
+        return list;
     }
 }
