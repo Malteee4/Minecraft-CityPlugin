@@ -24,7 +24,7 @@ public class Timer {
                 List<String> login = config.getStringList("login_today");
                 for (String str : config.getStringList("active.list")) {
                     if (!login.contains(str))
-                        config.set("active." + str, (int) (Math.sqrt(4 * config.getInt("active." + str)) - 1));
+                        config.set("active." + str, config.getInt("active." + str) > 1 ? ((int) (Math.sqrt(4 * config.getInt("active." + str)) - 1)) : (0));
                 }
                 config.set("login_today", new ArrayList<>());
                 config.set("last_day_saved", day);

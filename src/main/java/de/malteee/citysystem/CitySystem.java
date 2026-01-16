@@ -38,6 +38,7 @@ public class CitySystem extends JavaPlugin {
     private static MoneyManager mm;
     private static PlotManager pm;
     private static CityManager cm;
+    private static JobManager jm;
 
     private static HashSet<CityPlayer> players = new HashSet<>();
 
@@ -89,6 +90,7 @@ public class CitySystem extends JavaPlugin {
         getCommand("mot").setExecutor(new MotCommand());
         getCommand("loginStreak").setExecutor(new LoginBonusCommand());
         getCommand("jobs").setExecutor(new JobCommand());
+        getCommand("job").setExecutor(new JobCommand());
         getCommand("stats").setExecutor(new StatsCommand());
 
         for(int i = 0; i < maps.size(); i++) {
@@ -139,6 +141,7 @@ public class CitySystem extends JavaPlugin {
         mm = new MoneyManager();
         cm = new CityManager();
         pm = new PlotManager();
+        jm = new JobManager();
     }
 
     public void onDisable() {
@@ -165,6 +168,8 @@ public class CitySystem extends JavaPlugin {
         try {
             db.getCon().prepareStatement("INSERT INTO tbl_players(PLAYER_ID, MONEY, JOB, RANK, HOME) VALUES('" +
                     player.getUniqueId().toString() + "', 0, 'NONE', 'NONE', 'NONE')").execute();
+            db.getCon().prepareStatement("INSERT INTO tbl_jobs(PLAYER_ID, LUMBERJACK_EXP, FISHER_EXP, HUNTER_EXP, BUILDER_EXP, MINER_EXP, TRADER_EXP) VALUES" +
+                    "('" + player.getUniqueId().toString() + "', '0.0, 0.0', '0.0, 0.0', '0.0, 0.0', '0.0, 0.0', '0.0, 0.0', '0.0, 0.0')").execute();
             CityPlayer cityPlayer = new CityPlayer(player);
             players.add(cityPlayer);
             mm.createKonto(cityPlayer);
@@ -202,6 +207,8 @@ public class CitySystem extends JavaPlugin {
     public static CityManager getCm() {return cm;}
 
     public static PlotManager getPm() {return pm;}
+
+    public static JobManager getJm() {return jm;}
 
     public static Set<CityPlayer> getCityPlayers() {
         return players;

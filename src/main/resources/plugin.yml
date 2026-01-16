@@ -45,5 +45,7 @@ commands:
     description: shows your current login streak
   jobs:
     description: opens the job settings
+  job:
+    description: gives information about your current job
   stats:
     description: shows you your stats

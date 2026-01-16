@@ -17,7 +17,19 @@ public class JobCommand implements CommandExecutor {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) return false;
         CityPlayer cPlayer = CitySystem.getCityPlayer(player);
-        openJobGui(cPlayer);
+        if (label.equalsIgnoreCase("jobs"))
+            openJobGui(cPlayer);
+        else {
+            if (!cPlayer.hasJob()) {
+                player.sendMessage("§cYou currently have no job!");
+                return false;
+            }
+            Job job = cPlayer.getJob();
+            JobManager jm = CitySystem.getJm();
+            player.sendMessage("§aYou are currently a §l" + job.getDisplayName() + "§r§a:");
+
+
+        }
         return false;
     }
 
