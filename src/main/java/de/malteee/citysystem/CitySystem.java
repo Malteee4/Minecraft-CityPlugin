@@ -6,7 +6,9 @@ import de.malteee.citysystem.area.PosCommand;
 import de.malteee.citysystem.chat.MessageBroadcaster;
 import de.malteee.citysystem.commands_admin.*;
 import de.malteee.citysystem.commands_city.CityCommand;
+import de.malteee.citysystem.commands_farming.EndCommand;
 import de.malteee.citysystem.commands_farming.FarmworldCommand;
+import de.malteee.citysystem.commands_farming.NetherCommand;
 import de.malteee.citysystem.commands_general.WorldSpawnCommand;
 import de.malteee.citysystem.commands_general.*;
 import de.malteee.citysystem.core.*;
@@ -45,8 +47,8 @@ public class CitySystem extends JavaPlugin {
     public static World spawnWorld = Bukkit.getWorld("world");
     public static World mainWorld = Bukkit.getWorld("mainWorld");
     public static World farmWorld = Bukkit.getWorld("farmWorld");
-    //public static World netherWorld = Bukkit.getWorld("netherWorld");
-    //public static World endWorld = Bukkit.getWorld("endWorld");
+    public static World netherWorld = Bukkit.getWorld("netherWorld");
+    public static World endWorld = Bukkit.getWorld("endWorld");
 
     private List<String> maps = getConfig().getStringList("worlds");
 
@@ -92,6 +94,8 @@ public class CitySystem extends JavaPlugin {
         getCommand("jobs").setExecutor(new JobCommand());
         getCommand("job").setExecutor(new JobCommand());
         getCommand("stats").setExecutor(new StatsCommand());
+        getCommand("nether").setExecutor(new NetherCommand());
+        getCommand("end").setExecutor(new EndCommand());
 
         for(int i = 0; i < maps.size(); i++) {
             if (maps.get(i).equalsIgnoreCase("mainWorld")) {
@@ -99,7 +103,14 @@ public class CitySystem extends JavaPlugin {
                 Bukkit.createWorld(w);
                 Bukkit.getWorlds().add(Bukkit.getWorld(maps.get(i)));
             }
-            WorldCreator w = (WorldCreator) new WorldCreator(maps.get(i)).type(WorldType.NORMAL);
+            String name = maps.get(i);
+            World.Environment environment = World.Environment.NORMAL;
+            if (name.toLowerCase().contains("nether")) {
+                environment = World.Environment.NETHER;
+            }else if(name.toLowerCase().contains("end")) {
+                environment = World.Environment.THE_END;
+            }
+            WorldCreator w = (WorldCreator) new WorldCreator(maps.get(i)).environment(environment).type(WorldType.NORMAL);
             Bukkit.createWorld(w);
             Bukkit.getWorlds().add(Bukkit.getWorld(maps.get(i)));
         }
@@ -119,6 +130,8 @@ public class CitySystem extends JavaPlugin {
         Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
             mainWorld = Bukkit.getWorld("mainWorld");
             farmWorld = Bukkit.getWorld("farmWorld");
+            netherWorld = Bukkit.getWorld("netherWorld");
+            endWorld = Bukkit.getWorld("endWorld");
             try {
                 ResultSet rs = db.getResult("SELECT VALUE FROM tbl_properties WHERE CODE='mainspawn'");
                 while (rs.next()) {
@@ -134,6 +147,7 @@ public class CitySystem extends JavaPlugin {
         //new Border(new Location(mainWorld, -520, 100, -1000), 18100);
         //mainWorld.getWorldBorder().reset();
         new Border(new Location(farmWorld, 0, 100, 0), 2400);
+        new Border(new Location(netherWorld, 0, 100, 0), 1200);
         //new Border(new Location(spawnWorld, 600, 100, 1700), 2500);
         //spawnWorld.getWorldBorder().reset();
         new Timer();

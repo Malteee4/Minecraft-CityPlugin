@@ -1,10 +1,7 @@
 package de.malteee.citysystem.utilities;
 
 import de.malteee.citysystem.CitySystem;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.WorldCreator;
-import org.bukkit.WorldType;
+import org.bukkit.*;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -27,7 +24,13 @@ public class WorldCreation implements CommandExecutor {
                 if(args.length == 2) {
                     if(args[0].equalsIgnoreCase("create")) {
                         String name = args[1];
-                        WorldCreator w = (WorldCreator) new WorldCreator(name).type(WorldType.NORMAL);
+                        World.Environment environment = World.Environment.NORMAL;
+                        if (name.toLowerCase().contains("nether")) {
+                            environment = World.Environment.NETHER;
+                        }else if(name.toLowerCase().contains("end")) {
+                            environment = World.Environment.THE_END;
+                        }
+                        WorldCreator w = (WorldCreator) new WorldCreator(name).type(WorldType.NORMAL).environment(environment);
                         p.sendMessage("§3Welt wird erstellt!...");
                         Bukkit.createWorld(w);
                         Bukkit.getWorlds().add(Bukkit.getWorld(name));

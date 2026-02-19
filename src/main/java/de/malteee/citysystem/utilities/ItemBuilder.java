@@ -71,6 +71,16 @@ public class ItemBuilder {
         return this;
     }
 
+    public ItemBuilder setEnchantmentGlintOverride(boolean value) {
+        this.itemMeta.setEnchantmentGlintOverride(value);
+        return this;
+    }
+
+    public ItemBuilder setEnchantmentGlintOverride(boolean value, boolean add) {
+        if (add) this.itemMeta.setEnchantmentGlintOverride(value);
+        return this;
+    }
+
     public ItemBuilder addFlag(ItemFlag flag) {
         this.itemMeta.addItemFlags(flag);
         return this;

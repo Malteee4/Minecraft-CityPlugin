@@ -1,21 +1,16 @@
-package de.malteee.citysystem.commands_farming;
+package de.malteee.citysystem.commands_admin;
 
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
-public class EndCommand implements CommandExecutor {
+public class Portalcommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) return false;
-        if (args.length >= 1) {
-            if (args[0].equalsIgnoreCase("reset")) {
-                if (!player.hasPermission("CitySystem.resetEndWorld")) return false;
 
-            }
-        }
 
         return false;
     }

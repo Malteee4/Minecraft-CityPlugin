@@ -404,6 +404,7 @@ public class ShopSign implements Listener{
             Block block = e.getClickedBlock();
             if(block.getType().equals(Material.CHEST)) {
                 Chest chest = (Chest) block.getState();
+                if (chest.getCustomName() == null) return;
                 if(config.contains(chest.getCustomName())) {
                     //p.sendMessage(config.getString(chest.getCustomName() + ".ownername"));
                     if(config.contains(chest.getCustomName() + ".owner")) {

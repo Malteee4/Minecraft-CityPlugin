@@ -34,6 +34,8 @@ public class Database {
               + "PLAYER_ID varchar(40), DAYS_ACTIVE int, PUBLIC_SPAWN bool, BUILD_RIGHT varchar(300), EXPANSION varchar(50), STAGE varchar(20))").execute();
             con.prepareStatement("CREATE TABLE IF NOT EXISTS tbl_city_areas(AREA_ID varchar(20), CITY_ID varchar(30))").execute();
 
+            con.prepareStatement("CREATE TABLE IF NOT EXISTS tbl_portal(LOC1 varchar(40), LOC2 varchar(40), DESTINATION varchar(40))").execute();
+
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e) {

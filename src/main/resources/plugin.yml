@@ -49,3 +49,7 @@ commands:
     description: gives information about your current job
   stats:
     description: shows you your stats
+  nether:
+    description: teleports you to the nether
+  end:
+    description: teleports you to the end

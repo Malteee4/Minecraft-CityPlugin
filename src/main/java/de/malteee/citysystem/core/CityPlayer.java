@@ -136,8 +136,11 @@ public class CityPlayer {
                 config.set("job_cooldown.list", list);
             }
         }
-        config.set("job_cooldown." + uuid.toString(), 5);
-        CitySystem.getPlugin().saveConfig();
+        if (job != Job.NONE) {
+            config.set("job_cooldown." + uuid.toString(), 5);
+            CitySystem.getPlugin().saveConfig();
+            jobCooldown = 5;
+        }
         try {
             CitySystem.getDatabase().execute("UPDATE tbl_players SET JOB='" + job.toString() + "' WHERE PLAYER_ID='" + this.uuid.toString() + "'");
         }catch (Exception exception) {

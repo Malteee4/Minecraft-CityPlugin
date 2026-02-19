@@ -94,7 +94,7 @@ public class AreaChecker implements Listener {
                                 Area old = pl.getCurrentArea();
                                 pl.setCurrentArea(a);
                                 if (old != null)
-                                    if (old.equals(a)) continue;
+                                    if (old.getId().equals(a.getId())) continue;
                                 if (a.getType().equals(Area.AreaType.SPAWN))
                                     pl.toPlayer().sendMessage("§aYou've entered a spawn area!");
                                 if (a.getType().equals(Area.AreaType.CITY)) {
