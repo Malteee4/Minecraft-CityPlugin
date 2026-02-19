@@ -53,3 +53,5 @@ commands:
     description: teleports you to the nether
   end:
     description: teleports you to the end
+  createPortal:
+    description: admin use only

@@ -96,6 +96,7 @@ public class CitySystem extends JavaPlugin {
         getCommand("stats").setExecutor(new StatsCommand());
         getCommand("nether").setExecutor(new NetherCommand());
         getCommand("end").setExecutor(new EndCommand());
+        getCommand("createPortal").setExecutor(new Portalcommand());
 
         for(int i = 0; i < maps.size(); i++) {
             if (maps.get(i).equalsIgnoreCase("mainWorld")) {
