@@ -11,12 +11,11 @@ import org.bukkit.Bukkit;
 
 public class MessageBroadcaster {
 
-
     public MessageBroadcaster() {
         try {
             Bukkit.getScheduler().scheduleSyncRepeatingTask(CitySystem.getPlugin(), () -> {
                 for (CityPlayer player : CitySystem.getCityPlayers()) {
-                    int i = (int) (Math.random() * 2);
+                    int i = (int) Math.floor(Math.random() * 2);
                     switch (i) {
                         case 0 -> {
                             player.toPlayer().sendMessage("§6You've got " + CitySystem.getMm().getKonto(player).getMot() + "/" + Konto.MOT_MAX + " Shards today for playing!");

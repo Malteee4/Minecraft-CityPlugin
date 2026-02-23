@@ -67,7 +67,7 @@ public class CityCommand implements CommandExecutor {
                     player.sendMessage("§aYou're currently in §l" + city.getName() + "§r§a:\n" +
                             "  §7owner: §o" + Bukkit.getOfflinePlayer(city.getOwner()).getName() + "\n" +
                             "  §r§7stage: §o" + city.getStage().getDisplay() + "\n" +
-                            "  §r§7residential plots: §o0/2" + "\n" +
+                            "  §r§7residential plots: §o0/" + city.getStage().getResidential() + "\n" +
                             "  §r§7shop plots: §o---");
                 }else {
                     player.sendMessage("§cYou're currently not in a city!");
@@ -114,7 +114,7 @@ public class CityCommand implements CommandExecutor {
                 }
                 Location loc1 = cPlayer.getMarkedLocations()[0];
                 Location loc2 = cPlayer.getMarkedLocations()[1];
-                if (AreaChecker.partOfArea(loc1, loc2)) {
+                if (AreaChecker.partOfArea(loc1, loc2, Area.AreaType.CITY)) {
                     player.sendMessage("§cYou marked an area, that is already claimed");
                     return false;
                 }

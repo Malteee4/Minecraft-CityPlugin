@@ -22,4 +22,16 @@ public enum Stage {
         public String getDisplay() {
             return display;
         }
+
+        public int getResidential() {
+            return residential;
+        }
+
+        public int getShops() {
+            return shops;
+        }
+
+        public int getFarms() {
+            return farms;
+        }
 }

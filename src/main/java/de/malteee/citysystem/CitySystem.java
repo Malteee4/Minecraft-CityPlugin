@@ -2,6 +2,7 @@ package de.malteee.citysystem;
 
 import de.malteee.citysystem.area.AreaChecker;
 import de.malteee.citysystem.area.AreaCreator;
+import de.malteee.citysystem.area.Portal;
 import de.malteee.citysystem.area.PosCommand;
 import de.malteee.citysystem.chat.MessageBroadcaster;
 import de.malteee.citysystem.commands_admin.*;
@@ -67,6 +68,7 @@ public class CitySystem extends JavaPlugin {
         pluginManager.registerEvents(new PlayerDeathListener(), this);
         pluginManager.registerEvents(new AreaCreator(), this);
         pluginManager.registerEvents(new JobManager(), this);
+        pluginManager.registerEvents(new PortalCommand(), this);
 
         TabCompleter tabCompleter = new TabComplete();
         getCommand("spawn").setExecutor(new WorldSpawnCommand());
@@ -96,7 +98,7 @@ public class CitySystem extends JavaPlugin {
         getCommand("stats").setExecutor(new StatsCommand());
         getCommand("nether").setExecutor(new NetherCommand());
         getCommand("end").setExecutor(new EndCommand());
-        getCommand("createPortal").setExecutor(new Portalcommand());
+        getCommand("createPortal").setExecutor(new PortalCommand());
 
         for(int i = 0; i < maps.size(); i++) {
             if (maps.get(i).equalsIgnoreCase("mainWorld")) {
@@ -127,6 +129,7 @@ public class CitySystem extends JavaPlugin {
         }
 
         AreaChecker.initializeAreas();
+        Portal.initialize();
 
         Bukkit.getScheduler().scheduleSyncDelayedTask(this, () -> {
             mainWorld = Bukkit.getWorld("mainWorld");

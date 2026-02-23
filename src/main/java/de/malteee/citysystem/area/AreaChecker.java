@@ -168,12 +168,12 @@ public class AreaChecker implements Listener {
         return false;
     }
 
-    public static boolean partOfArea(Location corner1, Location corner2) {
+    public static boolean partOfArea(Location corner1, Location corner2, Area.AreaType type) {
         for (int x = Math.max(corner1.getBlockX(),corner2.getBlockX()); x >= Math.min(corner2.getBlockX(), corner1.getBlockX()); x--) {
             for (int z = Math.max(corner1.getBlockZ(), corner2.getBlockZ()); z >= Math.min(corner2.getBlockZ(), corner1.getBlockZ()); z--) {
                 Location check = new Location(corner1.getWorld(), x, 100, z);
                 if (AreaChecker.getAreaByLocation(check) != null) {
-                    return true;
+                    return AreaChecker.getAreaByLocation(check).getType() == type;
                 }
             }
         }return false;
