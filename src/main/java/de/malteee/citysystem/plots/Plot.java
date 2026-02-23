@@ -13,7 +13,8 @@ public abstract class Plot {
     private final String id;
     private final City city;
     private List<Area> areas;
-    private ArrayList<UUID> buildingRights = new ArrayList<>();
+    private ArrayList<UUID> buildingRights = new ArrayList<>(); //max: 5
+    private UUID owner;
 
     protected Plot(String id, City city) {
         this.id = id;
@@ -42,5 +43,15 @@ public abstract class Plot {
 
     public ArrayList<UUID> getBuildingRights() {
         return buildingRights;
+    }
+
+    public void addBuildingRights() {
+        //TODO
+
+    }
+
+    public void removeBuildingRights() {
+        //TODO
+
     }
 }

@@ -3,13 +3,17 @@ package de.malteee.citysystem.area;
 import de.malteee.citysystem.CitySystem;
 import de.malteee.citysystem.core.City;
 import de.malteee.citysystem.core.CityPlayer;
+import de.malteee.citysystem.core.Expansion;
 import de.malteee.citysystem.utilities.Tools;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.checkerframework.checker.units.qual.C;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -87,43 +91,52 @@ public class AreaChecker implements Listener {
                     }
                 }if (!empty) {
                     for (CityPlayer pl : possible) {
+                        Player player = pl.toPlayer();
+                        if (!player.getWorld().equals(CitySystem.mainWorld)) continue;
                         boolean inArea = false;
                         for (Area a : area.getAreas()) {
-                            if (a.isPlayerIn(pl.toPlayer())) {
+                            if (a.isPlayerIn(player)) {
                                 inArea = true;
                                 Area old = pl.getCurrentArea();
                                 pl.setCurrentArea(a);
                                 if (old != null)
                                     if (old.getId().equals(a.getId())) continue;
                                 if (a.getType().equals(Area.AreaType.SPAWN))
-                                    pl.toPlayer().sendMessage("§aYou've entered a spawn area!");
-                                if (a.getType().equals(Area.AreaType.CITY)) {
+                                    player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy("§aYou've entered a spawn area!"));
+                                if (a.getType().equals(Area.AreaType.CITY) || a.getType().equals(Area.AreaType.PLOT)) {
                                     City entered = a.getCity();
+                                    if (old != null) {
+                                        if (old.getType().equals(Area.AreaType.PLOT) && !a.getType().equals(Area.AreaType.PLOT))
+                                            pl.setCurrentArea(old);
+                                    }
                                     if (old == null) {
-                                        pl.toPlayer().sendMessage(entered.getWelcomeMessage());
+                                        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy(entered.getWelcomeMessage()));
                                         continue;
                                     }
                                     if (old.getType().equals(Area.AreaType.CITY)) {
                                         City oldCity = old.getCity();
                                         if (oldCity.equals(entered))
                                             continue;
-                                        //pl.toPlayer().sendMessage(oldCity.getGoodbyeMessage());
-                                        //TODO: check for expansion
-                                        pl.toPlayer().sendMessage(entered.getWelcomeMessage());
+                                        if (entered.hasExpansion(Expansion.GOODBYE_MSG))
+                                            player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy(pl.getCurrentArea().getCity().getGoodbyeMessage()));
+                                        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy(entered.getWelcomeMessage()));
                                     }
                                 }
-                                if (a.getType().equals(Area.AreaType.PLOT)) {
+                                if (a.getType().equals(Area.AreaType.PLOT) && old != null) {
                                     //plot areas are on top of city areas!
+                                    if (old.isPlayerIn(player) && old.getType() != Area.AreaType.PLOT)
+                                        pl.setCurrentArea(old);
                                 }
                             }
                         }if (!inArea) {
                             if (pl.getCurrentArea() != null) {
                                 if (pl.getCurrentArea().getType().equals(Area.AreaType.CITY)) {
-                                    //pl.toPlayer().sendMessage(pl.getCurrentArea().getCity().getGoodbyeMessage());
-                                    //TODO: check for expansion
-                                    pl.toPlayer().sendMessage("§7You've entered the wilderness!");
+                                    City city = pl.getCurrentArea().getCity();
+                                    if (city.hasExpansion(Expansion.GOODBYE_MSG))
+                                        player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy(pl.getCurrentArea().getCity().getGoodbyeMessage()));
+                                    player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy("§7You've entered the wilderness!"));
                                 }else if (pl.getCurrentArea().getType().equals(Area.AreaType.SPAWN)) {
-                                    pl.toPlayer().sendMessage("§7You've entered the wilderness!");
+                                    player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy("§7You've entered the wilderness!"));
                                 }
                             }
                             pl.setCurrentArea(null);

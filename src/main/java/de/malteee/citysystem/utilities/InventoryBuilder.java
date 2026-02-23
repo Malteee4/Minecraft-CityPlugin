@@ -44,6 +44,20 @@ public class InventoryBuilder implements Listener {
         return this;
     }
 
+    public InventoryBuilder setSlots(final @Nonnull ItemStack itemStack, final @Nonnull int... slots) {
+        for (int i : slots)
+            this.inventory.setItem(i, itemStack);
+        return this;
+    }
+
+    public InventoryBuilder setSlot(final int slot, final @Nonnull ItemStack itemStack, boolean set) {
+        if (set) {
+            this.clickActions.remove(slot);
+            this.inventory.setItem(slot, itemStack);
+        }
+        return this;
+    }
+
     public InventoryBuilder addItem(final @Nonnull ItemStack itemStack) {
         this.inventory.addItem(itemStack);
         this.clickActions.remove(this.inventory.first(itemStack));

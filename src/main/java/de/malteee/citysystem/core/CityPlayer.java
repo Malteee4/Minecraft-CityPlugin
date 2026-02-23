@@ -113,7 +113,8 @@ public class CityPlayer {
     }
 
     public int getJobCooldown() {
-       return jobCooldown;
+       return 0;
+       //return jobCooldown;
     }
 
     public void setJobCooldown(FileConfiguration config) {

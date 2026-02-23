@@ -151,4 +151,19 @@ public class City implements Listener {
             return false;
         }
     }
+
+    public List<Residential> getPlots() {
+        return plots;
+    }
+
+    public List<Shop> getShops() {
+        return shops;
+    }
+
+    public int getSize() {
+        int size = 0;
+        for (Area area : areas)
+            size += area.getSurface();
+        return size;
+    }
 }

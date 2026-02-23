@@ -2,6 +2,7 @@ package de.malteee.citysystem.world_managing;
 
 import de.malteee.citysystem.CitySystem;
 import de.malteee.citysystem.commands_admin.SetWorldSpawnCommand;
+import de.malteee.citysystem.commands_city.PlotCommand;
 import de.malteee.citysystem.commands_farming.FarmworldCommand;
 import de.malteee.citysystem.commands_farming.NetherCommand;
 import de.malteee.citysystem.commands_general.WorldSpawnCommand;

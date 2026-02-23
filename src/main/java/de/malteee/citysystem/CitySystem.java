@@ -7,6 +7,8 @@ import de.malteee.citysystem.area.PosCommand;
 import de.malteee.citysystem.chat.MessageBroadcaster;
 import de.malteee.citysystem.commands_admin.*;
 import de.malteee.citysystem.commands_city.CityCommand;
+import de.malteee.citysystem.commands_city.PlotCommand;
+import de.malteee.citysystem.commands_city.ShopCommand;
 import de.malteee.citysystem.commands_farming.EndCommand;
 import de.malteee.citysystem.commands_farming.FarmworldCommand;
 import de.malteee.citysystem.commands_farming.NetherCommand;
@@ -99,6 +101,8 @@ public class CitySystem extends JavaPlugin {
         getCommand("nether").setExecutor(new NetherCommand());
         getCommand("end").setExecutor(new EndCommand());
         getCommand("createPortal").setExecutor(new PortalCommand());
+        getCommand("plot").setExecutor(new PlotCommand());
+        getCommand("shop").setExecutor(new ShopCommand());
 
         for(int i = 0; i < maps.size(); i++) {
             if (maps.get(i).equalsIgnoreCase("mainWorld")) {

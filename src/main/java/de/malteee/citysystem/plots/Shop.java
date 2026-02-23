@@ -2,7 +2,6 @@ package de.malteee.citysystem.plots;
 
 import de.malteee.citysystem.core.City;
 import de.malteee.citysystem.core.CityPlayer;
-import de.malteee.citysystem.core.Rentable;
 
 public class Shop extends Plot implements Rentable {
 
@@ -12,6 +11,11 @@ public class Shop extends Plot implements Rentable {
 
     @Override
     public void startRenting(CityPlayer player) {
+
+    }
+
+    @Override
+    public void stopRenting() {
 
     }
 

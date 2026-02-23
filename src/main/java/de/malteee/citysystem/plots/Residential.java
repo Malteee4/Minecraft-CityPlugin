@@ -2,9 +2,9 @@ package de.malteee.citysystem.plots;
 
 import de.malteee.citysystem.core.City;
 import de.malteee.citysystem.core.CityPlayer;
-import de.malteee.citysystem.core.Rentable;
 
 public class Residential extends Plot implements Rentable {
+
 
 
     protected Residential(String id, City city) {
@@ -14,6 +14,11 @@ public class Residential extends Plot implements Rentable {
 
     @Override
     public void startRenting(CityPlayer player) {
+
+    }
+
+    @Override
+    public void stopRenting() {
 
     }
 

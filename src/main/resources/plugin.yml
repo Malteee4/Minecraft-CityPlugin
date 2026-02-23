@@ -55,3 +55,7 @@ commands:
     description: teleports you to the end
   createPortal:
     description: admin use only
+  plot:
+    description: used to create a residential plot
+  shop:
+    description: used to create a shop plot

@@ -1,6 +1,7 @@
 package de.malteee.citysystem.world_managing;
 
 import de.malteee.citysystem.CitySystem;
+import de.malteee.citysystem.commands_city.PlotCommand;
 import de.malteee.citysystem.core.CityPlayer;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -13,6 +14,7 @@ public class PlayerLeaveListener implements Listener {
     public void handlePlayerLeave(PlayerQuitEvent event) {
         event.setQuitMessage("");
         CityPlayer cPlayer = CitySystem.getCityPlayer(event.getPlayer());
+        PlotCommand.stop(event.getPlayer());
         CitySystem.removePlayer(cPlayer);
     }
 

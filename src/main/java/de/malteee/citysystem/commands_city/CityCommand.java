@@ -6,6 +6,7 @@ import de.malteee.citysystem.area.AreaChecker;
 import de.malteee.citysystem.core.City;
 import de.malteee.citysystem.core.CityPlayer;
 import de.malteee.citysystem.core.Expansion;
+import de.malteee.citysystem.core.Stage;
 import de.malteee.citysystem.money_system.Konto;
 import de.malteee.citysystem.utilities.ItemBuilder;
 import org.bukkit.Bukkit;
@@ -64,11 +65,13 @@ public class CityCommand implements CommandExecutor {
                 }
                 if (cPlayer.getCurrentArea().getType().equals(Area.AreaType.CITY)) {
                     City city = cPlayer.getCurrentArea().getCity();
+                    Stage stage = city.getStage();
                     player.sendMessage("§aYou're currently in §l" + city.getName() + "§r§a:\n" +
                             "  §7owner: §o" + Bukkit.getOfflinePlayer(city.getOwner()).getName() + "\n" +
-                            "  §r§7stage: §o" + city.getStage().getDisplay() + "\n" +
-                            "  §r§7residential plots: §o0/" + city.getStage().getResidential() + "\n" +
-                            "  §r§7shop plots: §o---");
+                            "  §r§7stage: §o" + stage.getDisplay() + "\n" +
+                            "  §r§7size: §o" + city.getSize() + " blocks" + "\n" +
+                            "  §r§7residential plots: §o" + city.getPlots().size() + "/" + stage.getResidential() + "\n" +
+                            "  §r§7shop plots: §o" + (stage.getShops() > 0 ? "":"---"));
                 }else {
                     player.sendMessage("§cYou're currently not in a city!");
                 }
@@ -156,7 +159,7 @@ public class CityCommand implements CommandExecutor {
             case "list" -> {
                 //TODO add pages
                 for (City c : CitySystem.getCm().getCities())
-                    player.sendMessage("§a- " + c.getName());
+                    player.sendMessage("§a- " + c.getName() + " (" + Bukkit.getOfflinePlayer(c.getOwner()).getName() + ")");
             }
             case "spawn" -> {
                 if (args.length < 2)
