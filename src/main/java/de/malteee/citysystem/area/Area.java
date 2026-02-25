@@ -107,6 +107,10 @@ public class Area implements Listener {
         return plot;
     }
 
+    public void setPlot(Plot plot) {
+        this.plot = plot;
+    }
+
     public AreaType getType() {
         return type;
     }
@@ -134,9 +138,9 @@ public class Area implements Listener {
         Location[] locations = new Location[4];
         World world = this.getLocOne().getWorld();
         locations[0] = new Location(world, this.xMin, this.yMin, this.zMin);
-        locations[1] = new Location(world, this.xMin, this.yMax, this.zMin);
+        locations[1] = new Location(world, this.xMin, this.yMin, this.zMax);
         locations[2] = new Location(world, this.xMax, this.yMin, this.zMin);
-        locations[3] = new Location(world, this.xMax, this.yMax, this.zMin);
+        locations[3] = new Location(world, this.xMax, this.yMin, this.zMax);
         return locations;
     }
 

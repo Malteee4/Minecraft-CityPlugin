@@ -105,15 +105,11 @@ public class AreaChecker implements Listener {
                                     player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy("§aYou've entered a spawn area!"));
                                 if (a.getType().equals(Area.AreaType.CITY) || a.getType().equals(Area.AreaType.PLOT)) {
                                     City entered = a.getCity();
-                                    if (old != null) {
-                                        if (old.getType().equals(Area.AreaType.PLOT) && !a.getType().equals(Area.AreaType.PLOT))
-                                            pl.setCurrentArea(old);
-                                    }
                                     if (old == null) {
                                         player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy(entered.getWelcomeMessage()));
                                         continue;
                                     }
-                                    if (old.getType().equals(Area.AreaType.CITY)) {
+                                    if (old.getType().equals(Area.AreaType.CITY) ||old.getType().equals(Area.AreaType.PLOT)) {
                                         City oldCity = old.getCity();
                                         if (oldCity.equals(entered))
                                             continue;
@@ -122,15 +118,16 @@ public class AreaChecker implements Listener {
                                         player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy(entered.getWelcomeMessage()));
                                     }
                                 }
-                                if (a.getType().equals(Area.AreaType.PLOT) && old != null) {
+                                if (a.getType().equals(Area.AreaType.CITY) && old != null) {
                                     //plot areas are on top of city areas!
-                                    if (old.isPlayerIn(player) && old.getType() != Area.AreaType.PLOT)
+                                    if (old.isPlayerIn(player) && old.getType() == Area.AreaType.PLOT) {
                                         pl.setCurrentArea(old);
+                                    }
                                 }
                             }
                         }if (!inArea) {
                             if (pl.getCurrentArea() != null) {
-                                if (pl.getCurrentArea().getType().equals(Area.AreaType.CITY)) {
+                                if (pl.getCurrentArea().getType().equals(Area.AreaType.CITY) || pl.getCurrentArea().getType().equals(Area.AreaType.PLOT)) {
                                     City city = pl.getCurrentArea().getCity();
                                     if (city.hasExpansion(Expansion.GOODBYE_MSG))
                                         player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy(pl.getCurrentArea().getCity().getGoodbyeMessage()));
@@ -147,8 +144,9 @@ public class AreaChecker implements Listener {
         }, 0, 8);
     }
 
+    //only city areas and spawn areas
     public static Area getAreaByLocation(Location location) {
-        Optional<Area> area = areas.stream().filter(a -> a.partOf(location)).findFirst();
+        Optional<Area> area = areas.stream().filter(a -> a.partOf(location)).filter(a -> a.getType() != Area.AreaType.PLOT).findFirst();
         return area.orElse(null);
     }
 
@@ -167,6 +165,21 @@ public class AreaChecker implements Listener {
 
         return (xMin == (area.getMaxX() + 1) && (zMax >= areaZMin && zMin <= areaZMax)) || (xMax == (area.getMinX() - 1)  && (zMax >= areaZMin && zMin <= areaZMax))
                 || (zMin == (area.getMaxZ() + 1) && (xMax >= areaXMin && xMin <= areaXMax)) || (zMax == (area.getMinZ() - 1) && (xMax >= areaXMin && xMin <= areaXMax));
+    }
+
+    public static boolean isAdjacentToLocationArea(Location area1_loc1, Location area1_loc2, Location area2_loc1, Location area2_loc2) {
+        int xMin1 = Math.min(area1_loc1.getBlockX(), area1_loc2.getBlockX());
+        int zMin1 = Math.min(area1_loc1.getBlockZ(), area1_loc2.getBlockZ());
+        int xMax1 = Math.max(area1_loc1.getBlockX(), area1_loc2.getBlockX());
+        int zMax1 = Math.max(area1_loc1.getBlockZ(), area1_loc2.getBlockZ());
+
+        int xMin2 = Math.min(area2_loc1.getBlockX(), area2_loc2.getBlockX());
+        int zMin2 = Math.min(area2_loc1.getBlockZ(), area2_loc2.getBlockZ());
+        int xMax2 = Math.max(area2_loc1.getBlockX(), area2_loc2.getBlockX());
+        int zMax2 = Math.max(area2_loc1.getBlockZ(), area2_loc2.getBlockZ());
+
+        return (xMin1 == (xMax2 + 1) && (zMax1 >= zMin2 && zMin1 <= zMax2)) || (xMax1 == (xMin2 - 1)  && (zMax1 >= zMin2 && zMin1 <= zMax2))
+                || (zMin1 == (zMax2 + 1) && (xMax1 >= xMin2 && xMin1 <= xMax2)) || (zMax1 == (zMin2 - 1) && (xMax1 >= xMin2 && xMin1 <= xMax2));
     }
 
     public static boolean partOfXZ(Area area, Location loc1, Location loc2) {
@@ -190,6 +203,44 @@ public class AreaChecker implements Listener {
                 }
             }
         }return false;
+    }
+
+    public static boolean partOfCity(Location loc1, Location loc2, City city) {
+        for (int x = Math.max(loc1.getBlockX(),loc2.getBlockX()); x >= Math.min(loc2.getBlockX(), loc2.getBlockX()); x--) {
+            for (int z = Math.max(loc1.getBlockZ(), loc2.getBlockZ()); z >= Math.min(loc2.getBlockZ(), loc2.getBlockZ()); z--) {
+                Location check = new Location(loc1.getWorld(), x, 100, z);
+                Area area = AreaChecker.getAreaByLocation(check);
+                if (area != null) {
+                    if (area.getType() == Area.AreaType.CITY) {
+                        return area.getCity().equals(city);
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    //x, z
+    public static boolean locationSpanPartOfAnother(Location area1_loc1, Location area1_loc2, Location area2_loc1, Location area2_loc2) {
+        int xMin1 = Math.min(area1_loc1.getBlockX(), area1_loc2.getBlockX());
+        int zMin1 = Math.min(area1_loc1.getBlockZ(), area1_loc2.getBlockZ());
+        int xMax1 = Math.max(area1_loc1.getBlockX(), area1_loc2.getBlockX());
+        int zMax1 = Math.max(area1_loc1.getBlockZ(), area1_loc2.getBlockZ());
+
+        int xMin2 = Math.min(area2_loc1.getBlockX(), area2_loc2.getBlockX());
+        int zMin2 = Math.min(area2_loc1.getBlockZ(), area2_loc2.getBlockZ());
+        int xMax2 = Math.max(area2_loc1.getBlockX(), area2_loc2.getBlockX());
+        int zMax2 = Math.max(area2_loc1.getBlockZ(), area2_loc2.getBlockZ());
+        /*Bukkit.broadcastMessage("xmax1-" + xMax1 + "\n" +
+                "xmax2-" + xMax2 + "\n" +
+                "xmin1-" + xMin1 + "\n" +
+                "xmmin2-" + xMin2 + "\n" +
+                "zmax1-" + zMax1 + "\n" +
+                "zmax2-" + zMax2 + "\n" +
+                "zmin1-" + zMin1 + "\n" +
+                "zmin2-" + zMin2
+        );*/
+        return !(xMin1 > xMax2 || xMax1 < xMin2 || zMin1 > zMax2 || zMax1 < zMin2);
     }
 
     public static SuperiorArea getSuperiorByLocation(Location location) {

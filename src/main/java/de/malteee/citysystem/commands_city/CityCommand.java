@@ -58,13 +58,14 @@ public class CityCommand implements CommandExecutor {
                 CitySystem.getPlugin().saveConfig();
             }
             case "info" -> {
-                //TODO: gui with general information, button to change name, button to set spawn, button to plot overview
-                if (cPlayer.getCurrentArea() == null) {
+                //TODO: gui with general information, button to change name, button to set spawn, button to plot
+                Area currentArea = cPlayer.getCurrentArea();
+                if (currentArea == null) {
                     player.sendMessage("§cYou're currently not in a city!");
                     return false;
                 }
-                if (cPlayer.getCurrentArea().getType().equals(Area.AreaType.CITY)) {
-                    City city = cPlayer.getCurrentArea().getCity();
+                if (currentArea.getType().equals(Area.AreaType.CITY) || currentArea.getType().equals(Area.AreaType.PLOT)) {
+                    City city = currentArea.getCity();
                     Stage stage = city.getStage();
                     player.sendMessage("§aYou're currently in §l" + city.getName() + "§r§a:\n" +
                             "  §7owner: §o" + Bukkit.getOfflinePlayer(city.getOwner()).getName() + "\n" +
@@ -211,7 +212,28 @@ public class CityCommand implements CommandExecutor {
                 }else {
                     player.sendMessage("§c You're currently not in a city!");
                 }
-
+            }
+            case "toggleborder" -> {
+                Area currentArea = cPlayer.getCurrentArea();
+                if (currentArea == null) {
+                    player.sendMessage("§cYou're currently not in a city!");
+                    return false;
+                }if (currentArea.getType().equals(Area.AreaType.CITY) || currentArea.getType().equals(Area.AreaType.PLOT)) {
+                    City city = currentArea.getCity();
+                    if (!city.getOwner().equals(player.getUniqueId())) {
+                        player.sendMessage("§cYou can only do this in a city you own!");
+                        return false;
+                    }
+                    if (city.borderShown()) {
+                        city.stopShowingBorder();
+                        player.sendMessage("§6The city border is no longer shown!");
+                    }else {
+                        city.showBorder();
+                        player.sendMessage("§6The city border is now shown!");
+                    }
+                }else {
+                    player.sendMessage("§cYou're currently not in a city!");
+                }
             }
         }
         return false;

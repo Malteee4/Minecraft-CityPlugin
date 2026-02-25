@@ -6,13 +6,13 @@ import de.malteee.citysystem.area.AreaChecker;
 import de.malteee.citysystem.plots.Residential;
 import de.malteee.citysystem.plots.Shop;
 import de.malteee.citysystem.utilities.Tools;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
+import org.bukkit.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,9 +28,11 @@ public class City implements Listener {
     private List<Shop> shops = new ArrayList<>();
 
     private double totalIncome, experience;
-    private int daysActive;
-    private boolean active = true, publicSpawn = false;
+    private int daysActive, s;
+    private boolean active = true, publicSpawn = false, showBorder = false;
+
     private Location spawnpoint;
+    private ArrayList<Location> corners = new ArrayList<>();
 
     private Stage stage;
 
@@ -48,6 +50,8 @@ public class City implements Listener {
             this.spawnpoint = position;
             this.stage = Stage.SETTLEMENT;
             this.buildingRight.add(owner.getUniqueId());
+            showBorder();
+            Bukkit.getScheduler().scheduleSyncDelayedTask(CitySystem.getPlugin(), this::stopShowingBorder, 20 * 40);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -156,6 +160,10 @@ public class City implements Listener {
         return plots;
     }
 
+    public void addResidentialPlot(Residential residential) {
+        this.plots.add(residential);
+    }
+
     public List<Shop> getShops() {
         return shops;
     }
@@ -165,5 +173,70 @@ public class City implements Listener {
         for (Area area : areas)
             size += area.getSurface();
         return size;
+    }
+
+    public void showBorder() {
+        OfflinePlayer player = Bukkit.getOfflinePlayer(owner);
+        showBorder = true;
+        corners = getCorners();
+        s = Bukkit.getScheduler().scheduleSyncRepeatingTask(CitySystem.getPlugin(), () -> {
+            if (!showBorder)
+                Bukkit.getScheduler().cancelTask(s);
+            if (player.isOnline()) {
+                Player pl = player.getPlayer();
+                if (pl != null) {
+                    for (Location corner : corners) {
+                        corner.setZ(corner.getBlockZ() + 0.5);
+                        corner.setX(corner.getBlockX() + 0.5);
+                        for (int i = 10; i < 400; i++) {
+                            corner.setY(i * 0.5);
+                            Particle.DustOptions orangeDust = new Particle.DustTransition(Color.fromRGB(255, 0, 0), Color.fromRGB(255, 160, 0), 1.0F);
+                            pl.spawnParticle(Particle.DUST_COLOR_TRANSITION, corner, 1, orangeDust);
+                        }
+                    }
+                }
+            }
+        }, 0, 5);
+    }
+
+    public void stopShowingBorder() {
+        showBorder = false;
+    }
+
+    public boolean borderShown() {
+        return showBorder;
+    }
+
+    public ArrayList<Location> getCorners() {
+        ArrayList<Location> corners = new ArrayList<>();
+        for (Area area : areas) {
+            for (Location loc : area.getCorners()) {
+                boolean corner = false;
+                Location neighbor1 = new Location(loc.getWorld(), loc.getBlockX() + 1, loc.getY(), loc.getBlockZ());
+                Location neighbor2 = new Location(loc.getWorld(), loc.getBlockX() - 1, loc.getY(), loc.getBlockZ());
+                Location neighbor3 = new Location(loc.getWorld(), loc.getBlockX(), loc.getY(), loc.getBlockZ() + 1);
+                Location neighbor4 = new Location(loc.getWorld(), loc.getBlockX(), loc.getY(), loc.getBlockZ() - 1);
+                Location neighbor5 = new Location(loc.getWorld(), loc.getBlockX() + 1, loc.getY(), loc.getBlockZ() - 1);
+                Location neighbor6 = new Location(loc.getWorld(), loc.getBlockX() - 1, loc.getY(), loc.getBlockZ() - 1);
+                Location neighbor7 = new Location(loc.getWorld(), loc.getBlockX() + 1, loc.getY(), loc.getBlockZ() + 1);
+                Location neighbor8 = new Location(loc.getWorld(), loc.getBlockX() - 1, loc.getY(), loc.getBlockZ() + 1);
+                for (Location neighbor : Arrays.asList(neighbor1, neighbor2, neighbor3, neighbor4, neighbor5, neighbor6, neighbor7, neighbor8)) {
+                    Area neighborArea = AreaChecker.getAreaByLocation(neighbor);
+                    if (neighborArea == null) {
+                        corner = true;
+                        continue;
+                    }else if (neighborArea.getType().equals(Area.AreaType.CITY) || neighborArea.getType().equals(Area.AreaType.PLOT)) {
+                        City other = neighborArea.getCity();
+                        if (!other.equals(this))
+                            corner = true;
+                    }else {
+                        corner = true;
+                    }
+                }
+                if (corner)
+                    corners.add(loc);
+            }
+        }
+        return corners;
     }
 }
