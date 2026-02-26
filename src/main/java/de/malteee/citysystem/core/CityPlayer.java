@@ -5,6 +5,7 @@ import de.malteee.citysystem.area.SuperiorArea;
 import de.malteee.citysystem.jobs.Job;
 import de.malteee.citysystem.area.Area;
 import de.malteee.citysystem.plots.Residential;
+import de.malteee.citysystem.utilities.Rank;
 import de.malteee.citysystem.utilities.Tools;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -25,6 +26,7 @@ public class CityPlayer {
     private SuperiorArea superiorArea;
     private Job job;
     private Location homePoint;
+    private Rank rank;
 
     public static final int BLOCKS_MAX = 60;
     private int blocksWild = 0, daysActive, jobCooldown;   //there is a maximum of how many blocks you're allowed to break and place in the wilderness
@@ -41,6 +43,11 @@ public class CityPlayer {
             if (!rs.getString("HOME").equalsIgnoreCase("NONE"))
                 homePoint = Tools.getLocFromString(rs.getString("HOME"), CitySystem.getPlugin());
             this.job = Job.valueOf(rs.getString("JOB"));
+            this.rank = Rank.valueOf(rs.getString("RANK"));
+            if (rank == Rank.NONE) {
+                CitySystem.getDatabase().execute("UPDATE tbl_players SET RANK='PLAYER' WHERE PLAYER_ID='" + player.getUniqueId().toString() + "'");
+                rank = Rank.PLAYER;
+            }
             FileConfiguration config = CitySystem.getPlugin().getConfig();
             if (!config.contains("active." + player.getUniqueId().toString()))
                 config.set("active." + player.getUniqueId().toString(), 0);
@@ -51,6 +58,7 @@ public class CityPlayer {
                 jobCooldown = 0;
             CitySystem.getPlugin().saveConfig();
             rs.close();
+            player.setPlayerListName(" " + rank.getDisplay().replace("%player%", player.getName()) + " ");
         }catch (Exception exception) {
             exception.printStackTrace();
         }
@@ -113,8 +121,7 @@ public class CityPlayer {
     }
 
     public int getJobCooldown() {
-       return 0;
-       //return jobCooldown;
+       return jobCooldown;
     }
 
     public void setJobCooldown(FileConfiguration config) {
@@ -148,6 +155,7 @@ public class CityPlayer {
             exception.printStackTrace();
         }
         this.job = job;
+        CitySystem.getJm().changeJob(player, job);
     }
 
     public void setMarked(Location loc, int index) {
@@ -181,5 +189,19 @@ public class CityPlayer {
 
     public boolean hasHomePoint() {
        return homePoint != null;
+    }
+
+    public void setRank(Rank rank) {
+       this.rank = rank;
+       try {
+           CitySystem.getDatabase().execute("UPDATE tbl_players SET RANK='" + rank.toString() + "' WHERE PLAYER_ID='" + player.getUniqueId() + "'");
+       } catch (Exception e) {
+           e.printStackTrace();
+       }
+       player.setPlayerListName(" " + rank.getDisplay().replace("%player%", player.getName()) + " ");
+    }
+
+    public Rank getRank() {
+       return rank;
     }
 }

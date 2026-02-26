@@ -19,6 +19,7 @@ import de.malteee.citysystem.core.Database;
 import de.malteee.citysystem.jobs.JobCommand;
 import de.malteee.citysystem.jobs.JobManager;
 import de.malteee.citysystem.money_system.MoneyManager;
+import de.malteee.citysystem.money_system.ShopSign;
 import de.malteee.citysystem.plots.PlotManager;
 import de.malteee.citysystem.utilities.*;
 import de.malteee.citysystem.chat.PlayerChatListener;
@@ -31,9 +32,11 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 public class CitySystem extends JavaPlugin {
 
@@ -55,6 +58,8 @@ public class CitySystem extends JavaPlugin {
 
     private List<String> maps = getConfig().getStringList("worlds");
 
+    public static DecimalFormat df = new DecimalFormat("#0.00");
+
     public void onEnable() {
         plugin = this;
         db = new Database().connect("database");
@@ -69,7 +74,6 @@ public class CitySystem extends JavaPlugin {
         pluginManager.registerEvents(new HologramCommand(), this);
         pluginManager.registerEvents(new PlayerDeathListener(), this);
         pluginManager.registerEvents(new AreaCreator(), this);
-        pluginManager.registerEvents(new JobManager(), this);
         pluginManager.registerEvents(new PortalCommand(), this);
 
         TabCompleter tabCompleter = new TabComplete();
@@ -103,6 +107,7 @@ public class CitySystem extends JavaPlugin {
         getCommand("createPortal").setExecutor(new PortalCommand());
         getCommand("plot").setExecutor(new PlotCommand());
         getCommand("shop").setExecutor(new ShopCommand());
+        getCommand("rank").setExecutor(new RankCommand());
 
         for(int i = 0; i < maps.size(); i++) {
             if (maps.get(i).equalsIgnoreCase("mainWorld")) {
@@ -164,6 +169,16 @@ public class CitySystem extends JavaPlugin {
         cm = new CityManager();
         pm = new PlotManager();
         jm = new JobManager();
+
+        /*try {
+            ResultSet rs = db.getResult("SELECT * FROM tbl_players");
+            while (rs.next()) {
+                db.getCon().prepareStatement("INSERT INTO tbl_jobs(PLAYER_ID, LUMBERJACK_EXP, FISHER_EXP, HUNTER_EXP, BUILDER_EXP, MINER_EXP, TRADER_EXP) VALUES" +
+                        "('" + rs.getString("PLAYER_ID") + "', '0.0, 0.0', '0.0, 0.0', '0.0, 0.0', '0.0, 0.0', '0.0, 0.0', '0.0, 0.0')").execute();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }*/
     }
 
     public void onDisable() {
@@ -195,6 +210,7 @@ public class CitySystem extends JavaPlugin {
             CityPlayer cityPlayer = new CityPlayer(player);
             players.add(cityPlayer);
             mm.createKonto(cityPlayer);
+            jm.updatePlayers();
         }catch (Exception exception) {
             exception.printStackTrace();
         }
@@ -217,6 +233,14 @@ public class CitySystem extends JavaPlugin {
     public static CityPlayer getCityPlayer(Player player) {
         for (CityPlayer pl : players) {
             if (pl.toPlayer().equals(player))
+                return pl;
+        }
+        return null;
+    }
+
+    public static CityPlayer getCityPlayer(UUID uuid) {
+        for (CityPlayer pl : players) {
+            if (pl.toPlayer().getUniqueId().equals(uuid))
                 return pl;
         }
         return null;

@@ -30,7 +30,9 @@ public class JobCommand implements CommandExecutor {
             Job job = cPlayer.getJob();
             JobManager jm = CitySystem.getJm();
             player.sendMessage("§aYou are currently a §l" + job.getDisplayName() + "§r§a:");
-
+            player.sendMessage("  §a§o> Exp: " + CitySystem.df.format(jm.getExpByJob(player, job)));
+            player.sendMessage("  §a§o> money made as " + job.getDisplayName() + ": " + CitySystem.df.format(jm.getMoneyByJob(player, job)) + " Shards");
+            player.sendMessage("  §a§o> money made today: " + CitySystem.df.format(jm.getMoneyToday(player)) + " Shards");
 
         }
         return false;

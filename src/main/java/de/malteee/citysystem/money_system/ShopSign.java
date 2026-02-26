@@ -1,4 +1,4 @@
-package de.malteee.citysystem.utilities;
+package de.malteee.citysystem.money_system;
 
 import java.util.ArrayList;
 import java.util.HashMap;

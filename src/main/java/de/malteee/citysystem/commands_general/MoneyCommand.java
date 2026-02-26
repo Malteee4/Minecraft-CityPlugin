@@ -68,7 +68,7 @@ public class MoneyCommand implements CommandExecutor {
                     player.sendMessage("§aShards sent!");
                 }
             }
-            player.sendMessage("§aYour current balance is: §l" + CitySystem.getMm().getKonto(cPlayer).getMoney() + " Shards");    //Shards
+            player.sendMessage("§aYour current balance is: §l" + CitySystem.df.format(CitySystem.getMm().getKonto(cPlayer).getMoney()) + " Shards");    //Shards
         }else {
             //TODO: error message
         }

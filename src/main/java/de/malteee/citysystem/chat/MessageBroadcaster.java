@@ -9,13 +9,15 @@ import net.md_5.bungee.api.chat.HoverEvent;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 
+import java.util.Random;
+
 public class MessageBroadcaster {
 
     public MessageBroadcaster() {
         try {
             Bukkit.getScheduler().scheduleSyncRepeatingTask(CitySystem.getPlugin(), () -> {
                 for (CityPlayer player : CitySystem.getCityPlayers()) {
-                    int i = (int) Math.floor(Math.random() * 2);
+                    int i = new Random().nextInt(3);
                     switch (i) {
                         case 0 -> {
                             player.toPlayer().sendMessage("§6You've got " + CitySystem.getMm().getKonto(player).getMot() + "/" + Konto.MOT_MAX + " Shards today for playing!");
@@ -31,7 +33,11 @@ public class MessageBroadcaster {
                                             "https://discord.gg/pJSeMNhDgn" + "\"}}");*/
                         }
                         case 2 -> {
-
+                            double money = CitySystem.getJm().getMoneyToday(player.toPlayer());
+                            if (player.hasJob())
+                                player.toPlayer().sendMessage("§eYou earned §l" + CitySystem.df.format(money) + "§r§e Shard" + (money == 1 ? "":"s") + " today through your job!");
+                            else
+                                player.toPlayer().sendMessage("§eYou currently have no job! Just use §l/jobs §r§eto select one!");
                         }
                         default -> {
                             return;

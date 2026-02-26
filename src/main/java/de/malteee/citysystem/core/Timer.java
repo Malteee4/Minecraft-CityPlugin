@@ -40,6 +40,8 @@ public class Timer {
                     cPlayer.setJobCooldown(config);
                     konto.clearMot();
                     cPlayer.setBlocksWilderness(0);
+                    config.set("job." + cPlayer.toPlayer().getUniqueId(), 0);
+                    CitySystem.getPlugin().saveConfig();
                 }
                 if (konto.getMot() < MOT_MAX) {
                     konto.addMot(konto.motPerMinute);

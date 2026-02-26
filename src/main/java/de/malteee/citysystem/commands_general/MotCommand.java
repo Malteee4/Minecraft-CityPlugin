@@ -15,7 +15,8 @@ public class MotCommand implements CommandExecutor {
         if (!(sender instanceof Player player)) return false;
         CityPlayer cPlayer = CitySystem.getCityPlayer(player);
         if (cPlayer == null) return false;
-        player.sendMessage("§6 You've got " + CitySystem.getMm().getKonto(cPlayer).getMot() + "/" + Konto.MOT_MAX + " Shards today for playing!");
+        double mot = CitySystem.getMm().getKonto(cPlayer).getMot();
+        player.sendMessage("§6 You've got " + mot + "/" + Konto.MOT_MAX + " Shard" + (mot == 1 ? "":"s") + " today for playing!");
         return false;
     }
 }

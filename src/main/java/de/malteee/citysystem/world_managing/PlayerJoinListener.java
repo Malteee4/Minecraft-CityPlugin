@@ -22,7 +22,6 @@ public class PlayerJoinListener implements Listener {
     public void handlePlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         event.setJoinMessage("");
-        player.setPlayerListName("  §6§l" + player.getName() + "  ");
         if (player.getName().equals("JanikObenaus"))
             player.teleport(new Location(Bukkit.getWorld("janiksWorld"), -438, 70, 206));
         if (!CitySystem.isRegistered(player)) {

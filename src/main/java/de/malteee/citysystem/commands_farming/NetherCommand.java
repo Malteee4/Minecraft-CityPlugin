@@ -38,13 +38,13 @@ public class NetherCommand implements CommandExecutor {
         int counter = 10;
         boolean search = true;
         while (counter > 0) {
-            double x = Math.random() * 600;
-            double z = Math.random() * 600;
+            double x = -500 + Math.random() * 1000;
+            double z = -500 + Math.random() * 1000;
             double y = 300;
             Location loc = new Location(CitySystem.netherWorld, x, y, z);
             cooldown.put(player, loc);
 
-            while (((loc.getBlock().getType().equals(Material.AIR)) ||
+            while (((loc.getBlock().getType().equals(Material.AIR)) || loc.getBlock().getType().equals(Material.LAVA) ||
                     (loc.getBlock().getRelative(BlockFace.UP).getType() != Material.AIR) || (loc.getBlock().getRelative(BlockFace.UP).getRelative(BlockFace.UP).getType() != Material.AIR)
                     || (loc.getBlock().getType().equals(Material.BEDROCK)))
                     && (loc.getY() > 5)) {
@@ -64,7 +64,7 @@ public class NetherCommand implements CommandExecutor {
         }
         Bukkit.getScheduler().scheduleSyncDelayedTask(CitySystem.getPlugin(), () -> {
             cooldown.remove(player);
-        }, 20 * 30);
+        }, 20 * 60);
         return false;
     }
 

@@ -36,8 +36,8 @@ public class FarmworldCommand implements CommandExecutor {
             player.teleport(cooldown.get(player));
             return false;
         }
-        double x = Math.random() * 1000;
-        double z = Math.random() * 1000;
+        double x = -900 + Math.random() * 1900;
+        double z = -900 + Math.random() * 1900;
         double y = 300;
         Location loc = new Location(CitySystem.farmWorld, x, y, z);
         cooldown.put(player, loc);
@@ -47,7 +47,7 @@ public class FarmworldCommand implements CommandExecutor {
         player.teleport(loc);
         Bukkit.getScheduler().scheduleSyncDelayedTask(CitySystem.getPlugin(), () -> {
             cooldown.remove(player);
-        }, 20 * 30);
+        }, 20 * 60);
         return false;
     }
 
