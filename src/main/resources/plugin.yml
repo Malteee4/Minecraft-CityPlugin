@@ -61,3 +61,5 @@ commands:
     description: used to create a shop plot
   rank:
     description: admin use only
+  nextDay:
+    description: admin use only

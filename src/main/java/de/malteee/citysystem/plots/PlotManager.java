@@ -15,7 +15,7 @@ public class PlotManager {
     }
 
     public void initializeResidentialPlots() {
-
+        //TODO
 
     }
 

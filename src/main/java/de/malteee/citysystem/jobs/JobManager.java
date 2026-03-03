@@ -6,6 +6,7 @@ import de.malteee.citysystem.utilities.Tools;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -13,6 +14,8 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.CrafterCraftEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.inventory.PrepareItemCraftEvent;
+import org.bukkit.event.player.PlayerFishEvent;
 
 import java.sql.Array;
 import java.sql.ResultSet;
@@ -26,7 +29,8 @@ public class JobManager implements Listener {
     private final HashMap<UUID, Double> moneyAllTime = new HashMap<>();
     //private HashMap<UUID, Double> moneyToSave = new HashMap<>();
     private final HashMap<UUID, Double> moneyToday = new HashMap<>();
-    private final HashMap<UUID, Integer> tempPoints = new HashMap<>();
+    private final HashMap<UUID, Double> tempPoints = new HashMap<>();
+    private final HashMap<UUID, Integer> level = new HashMap<>();
     private FileConfiguration config = CitySystem.getPlugin().getConfig();
 
     public JobManager() {
@@ -38,12 +42,12 @@ public class JobManager implements Listener {
                 CityPlayer cPlayer = CitySystem.getCityPlayer(uuid);
                 if (cPlayer == null) continue;
                 if (cPlayer.getJob() == Job.NONE) continue;
-                int points = tempPoints.get(uuid);
-                config.set("job." + uuid, config.getInt("job." + uuid) + points);
+                double points = tempPoints.get(uuid);
+                config.set("job." + uuid, config.getDouble("job." + uuid) + points);
                 CitySystem.getPlugin().saveConfig();
-                moneyToday.put(uuid, (config.getInt("job." + uuid) / 8d));
-                double moneyToAdd = points / 8d;
-                double expToAdd = points / 4d;
+                moneyToday.put(uuid, (config.getDouble("job." + uuid) / 11d));
+                double moneyToAdd = points / 11d;
+                double expToAdd = points / 6d;
                 exp.put(uuid, exp.get(uuid) + expToAdd);
                 moneyAllTime.put(uuid, moneyAllTime.get(uuid) + moneyToAdd);
                 try {
@@ -54,7 +58,9 @@ public class JobManager implements Listener {
                 }
                 //Bukkit.broadcastMessage(moneyAllTime.get(uuid) + "   " + moneyToAdd + "   " + expToAdd + " Exp");
                 CitySystem.getMm().getKonto(cPlayer).addMoney(moneyToAdd);
-                tempPoints.put(uuid, 0);
+                tempPoints.put(uuid, 0d);
+                if (cPlayer.hasJob())
+                    level.put(uuid, getLevelByJob(uuid, cPlayer.getJob()));
             }
         }, 0, 20*60);
     }
@@ -72,12 +78,14 @@ public class JobManager implements Listener {
                     moneyAllTime.put(uuid, Double.parseDouble(values.get(1)));
                 }
                 if (config.contains("job." + uuid)) {
-                    moneyToday.put(uuid, (config.getInt("job." + uuid) / 8d));
+                    moneyToday.put(uuid, (config.getDouble("job." + uuid) / 11d));
                 }else {
                     config.set("job." + uuid, 0);
                     CitySystem.getPlugin().saveConfig();
                 }
-                tempPoints.put(uuid, 0);
+                tempPoints.put(uuid, 0d);
+                if (!job.equals(Job.NONE))
+                    level.put(uuid, getLevelByJob(uuid, job));
             }
         }catch (Exception exception) {
             exception.printStackTrace();
@@ -85,6 +93,7 @@ public class JobManager implements Listener {
     }
 
     public void changeJob(Player player, Job job) {
+        if (job.equals(Job.NONE)) return;
         try {
             ResultSet rs = CitySystem.getDatabase().getResult("SELECT * FROM tbl_jobs INNER JOIN tbl_players ON tbl_jobs.PLAYER_ID = tbl_players.PLAYER_ID WHERE tbl_players.PLAYER_ID='" + player.getUniqueId() + "'");
             rs.next();
@@ -93,6 +102,7 @@ public class JobManager implements Listener {
             values = Tools.stringToList(rs.getString(job.toString() + "_EXP"));
             exp.put(uuid, Double.parseDouble(values.get(0)));
             moneyAllTime.put(uuid, Double.parseDouble(values.get(1)));
+            level.put(uuid, getLevelByJob(uuid, job));
         }catch (Exception exception) {
             exception.printStackTrace();
         }
@@ -130,6 +140,34 @@ public class JobManager implements Listener {
         return money;
     }
 
+    public int getLevelByJob(UUID uuid, Job job) {
+        double exp = 0;
+        try {
+            ResultSet rs = CitySystem.getDatabase().getResult("SELECT * FROM tbl_jobs WHERE PLAYER_ID='" + uuid + "'");
+            if (rs.next()) {
+                ArrayList<String> values = Tools.stringToList(rs.getString(job.toString() + "_EXP"));
+                exp = Double.parseDouble(values.getFirst());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        int level = 1;
+        for (int i = 1; ((Math.pow(6 * i, 1.5)) + 10) <= exp; i++) {
+            level++;
+            exp -= ((Math.pow(6 * i, 1.5)) + 10);
+        }
+        return level;
+    }
+
+    public int getLevel(double exp) {
+        int level = 1;
+        for (int i = 1; ((Math.pow(6 * i, 1.5)) + 10) <= exp; i++) {
+            level++;
+            exp -= ((Math.pow(6 * i, 1.5)) + 10);
+        }
+        return level;
+    }
+
     @EventHandler
     public void handlePlayerBreakBlock(BlockBreakEvent event) {
         Player player = event.getPlayer();
@@ -140,9 +178,9 @@ public class JobManager implements Listener {
             if (player.getWorld().equals(CitySystem.mainWorld) && (job != Job.BUILDER && job != Job.TRADER && job != Job.FISHER))
                 return;
             Material block = event.getBlock().getType();
-            for (String s : job.getBlocks()) {
-                if (block.toString().contains(s)) {
-                    tempPoints.put(player.getUniqueId(), tempPoints.get(player.getUniqueId()) + 1);
+            for (Material m : job.getBlocks()) {
+                if (block.equals(m)) {
+                    tempPoints.put(player.getUniqueId(), tempPoints.get(player.getUniqueId()) + (job.getValue(m) * (1 + level.get(player.getUniqueId()) * 0.1)));
                     break;
                 }
             }
@@ -159,9 +197,9 @@ public class JobManager implements Listener {
             if (player.getWorld().equals(CitySystem.mainWorld) && (job != Job.BUILDER && job != Job.TRADER && job != Job.FISHER))
                 return;
             Material block = event.getBlock().getType();
-            for (String s : job.getBlocks()) {
-                if (block.toString().contains(s)) {
-                    tempPoints.put(player.getUniqueId(), tempPoints.get(player.getUniqueId()) + 1);
+            for (Material m : job.getBlocks()) {
+                if (block.equals(m)) {
+                    tempPoints.put(player.getUniqueId(), tempPoints.get(player.getUniqueId()) + (job.getValue(m) * (1 + level.get(player.getUniqueId()) * 0.1)));
                     break;
                 }
             }
@@ -170,11 +208,24 @@ public class JobManager implements Listener {
 
     @EventHandler
     public void handlePlayerKillEntity(EntityDeathEvent event) {
+        Player player = event.getEntity().getKiller();
+        CityPlayer cPlayer = CitySystem.getCityPlayer(player);
+        if (cPlayer == null) return;
 
     }
 
     @EventHandler
-    public void handlePlayerCraft(CrafterCraftEvent event) {
-        
+    public void handlePlayerCraft(PrepareItemCraftEvent event) {
+        Player player = (Player) event.getView().getPlayer();
+        CityPlayer cPlayer = CitySystem.getCityPlayer(player);
+        if (cPlayer == null) return;
+
+    }
+
+    @EventHandler
+    public void handlePlayerFish(PlayerFishEvent event) {
+        Player player = event.getPlayer();
+        CityPlayer cPlayer = CitySystem.getCityPlayer(player);
+        if (cPlayer == null) return;
     }
 }

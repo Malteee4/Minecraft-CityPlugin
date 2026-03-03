@@ -26,10 +26,14 @@ import de.malteee.citysystem.chat.PlayerChatListener;
 import de.malteee.citysystem.world_managing.*;
 import org.bukkit.*;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
@@ -59,10 +63,21 @@ public class CitySystem extends JavaPlugin {
     private List<String> maps = getConfig().getStringList("worlds");
 
     public static DecimalFormat df = new DecimalFormat("#0.00");
+    private static FileConfiguration jobConfig;
 
     public void onEnable() {
         plugin = this;
         db = new Database().connect("database");
+
+        File path = new File(this.getDataFolder(), "jobs.yml");
+        if(!path.exists()) { System.out.println(path.toString());
+            try {
+                path.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        jobConfig = YamlConfiguration.loadConfiguration(path);
 
         PluginManager pluginManager = getPlugin().getServer().getPluginManager();
         pluginManager.registerEvents(new PlayerJoinListener(), this);
@@ -108,6 +123,7 @@ public class CitySystem extends JavaPlugin {
         getCommand("plot").setExecutor(new PlotCommand());
         getCommand("shop").setExecutor(new ShopCommand());
         getCommand("rank").setExecutor(new RankCommand());
+        getCommand("nextDay").setExecutor(new Timer());
 
         for(int i = 0; i < maps.size(); i++) {
             if (maps.get(i).equalsIgnoreCase("mainWorld")) {
@@ -163,7 +179,7 @@ public class CitySystem extends JavaPlugin {
         new Border(new Location(netherWorld, 0, 100, 0), 1200);
         //new Border(new Location(spawnWorld, 600, 100, 1700), 2500);
         //spawnWorld.getWorldBorder().reset();
-        new Timer();
+        //new Timer();
         new MessageBroadcaster();
         mm = new MoneyManager();
         cm = new CityManager();
@@ -266,5 +282,17 @@ public class CitySystem extends JavaPlugin {
 
     public static CitySystem getPlugin() {
         return plugin;
+    }
+
+    public static FileConfiguration getJobConfig() {
+        return jobConfig;
+    }
+
+    public static void saveJobConfig() {
+        try {
+            jobConfig.save(new File(CitySystem.getPlugin().getDataFolder(), "jobs.yml"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

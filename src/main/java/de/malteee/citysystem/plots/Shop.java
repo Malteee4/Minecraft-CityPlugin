@@ -35,4 +35,9 @@ public class Shop extends Plot implements Rentable {
     public int getRent() {
         return 0;
     }
+
+    @Override
+    public void setRentable(boolean val) {
+        super.rentable = val;
+    }
 }

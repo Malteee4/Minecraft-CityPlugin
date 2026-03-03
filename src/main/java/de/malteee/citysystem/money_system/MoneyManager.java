@@ -54,6 +54,10 @@ public class MoneyManager {
         return konten.get(player.toPlayer().getUniqueId());
     }
 
+    public Konto getKonto(UUID uuid) {
+        return konten.get(uuid);
+    }
+
     public Konto getKonto(String name) {
         for (OfflinePlayer player : Bukkit.getOfflinePlayers()) {
             if (player.getName().equalsIgnoreCase(name))

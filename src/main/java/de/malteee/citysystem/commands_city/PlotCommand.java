@@ -23,6 +23,8 @@ public class PlotCommand implements CommandExecutor {
     private static HashMap<UUID, ArrayList<Location[]>> creatingPlot = new HashMap<>();
     private static HashMap<UUID, Integer[]> creatingPlotHeight = new HashMap<>();
 
+    private ArrayList<Player> renting = new ArrayList<>();
+
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) return false;
@@ -208,10 +210,29 @@ public class PlotCommand implements CommandExecutor {
 
             }
             case "rentable" -> {
+                if (args.length < 2) {
+                    player.sendMessage("§cPlease use /plot rentable <true/false>");
+                    return false;
+                }
+                if (cPlayer.getCurrentArea() == null) {
+                    player.sendMessage("§cYou're not standing on a plot!");
+                    return false;
+                }
+                if (!cPlayer.getCurrentArea().getType().equals(Area.AreaType.PLOT)) {
+                    player.sendMessage("§cYou're not standing on a plot!");
+                    return false;
+                }
+                Plot currentPlot = cPlayer.getCurrentArea().getPlot();
+                if (currentPlot instanceof Residential residentialPlot) {
 
+
+                }else {
+                    player.sendMessage("§cNot a residential plot!");
+                }
             }
             case "edit" -> {
-
+                //TODO: select plot
+                // --> set height, add areas, (remove areas)
             }
         }
         return false;

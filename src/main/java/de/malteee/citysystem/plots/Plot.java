@@ -12,17 +12,19 @@ import java.util.UUID;
 
 public abstract class Plot {
 
-    private String id, name;
-    private City city;
-    private List<Area> areas;
-    private ArrayList<UUID> buildingRights = new ArrayList<>(); //max: 5
-    private UUID owner;
+    protected String id, name;
+    protected City city;
+    protected List<Area> areas;
+    protected ArrayList<UUID> buildingRights = new ArrayList<>(); //max: 5
+    protected UUID owner;
+    protected boolean rentable;
 
     public Plot(String id, City city, ArrayList<Area> areas, String name) {
         this.id = id;
         this.city = city;
         this.areas = areas;
         this.name = name;
+        this.rentable = false;
     }
 
     public void addArea() {
@@ -66,4 +68,10 @@ public abstract class Plot {
         //TODO
 
     }
+
+    public boolean isRentable() {
+        return rentable;
+    }
+
+    public abstract void setRentable(boolean val);
 }
