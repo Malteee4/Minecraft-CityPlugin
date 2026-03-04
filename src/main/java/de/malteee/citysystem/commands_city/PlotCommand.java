@@ -139,7 +139,8 @@ public class PlotCommand implements CommandExecutor {
                             ArrayList<Area> areas = new ArrayList<>();
                             for (Location[] locations : list)
                                 areas.add(new Area(locations[0], locations[1], Area.AreaType.PLOT, AreaChecker.getSuperiorByLocation(locations[0]), true));
-                            city.addResidentialPlot(new Residential("PLOT-" + areas.getFirst().getLocOne().toString(), city, areas, city.getName().toUpperCase() + "-PLOT" + (city.getPlots().size() + 1)));
+                            city.addResidentialPlot(new Residential("PLOT-" + areas.getFirst().getLocOne().toString(), city, areas,
+                                    city.getName().toUpperCase() + "-PLOT" + (city.getPlots().size() + 1), false, true));
                             player.sendMessage("§aPlot has been created!");
                             stop(player);
                         }

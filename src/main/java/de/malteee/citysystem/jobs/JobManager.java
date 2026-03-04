@@ -86,7 +86,7 @@ public class JobManager implements Listener {
                 tempPoints.put(uuid, 0d);
                 if (!job.equals(Job.NONE))
                     level.put(uuid, getLevelByJob(uuid, job));
-            }
+            }rs.close();
         }catch (Exception exception) {
             exception.printStackTrace();
         }
@@ -103,6 +103,7 @@ public class JobManager implements Listener {
             exp.put(uuid, Double.parseDouble(values.get(0)));
             moneyAllTime.put(uuid, Double.parseDouble(values.get(1)));
             level.put(uuid, getLevelByJob(uuid, job));
+            rs.close();
         }catch (Exception exception) {
             exception.printStackTrace();
         }
@@ -119,7 +120,7 @@ public class JobManager implements Listener {
             if (rs.next()) {
                 ArrayList<String> values = Tools.stringToList(rs.getString(job.toString() + "_EXP"));
                 exp = Double.parseDouble(values.get(0));
-            }
+            }rs.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -133,7 +134,7 @@ public class JobManager implements Listener {
             if (rs.next()) {
                 ArrayList<String> values = Tools.stringToList(rs.getString(job.toString() + "_EXP"));
                 money = Double.parseDouble(values.get(1));
-            }
+            }rs.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -147,7 +148,7 @@ public class JobManager implements Listener {
             if (rs.next()) {
                 ArrayList<String> values = Tools.stringToList(rs.getString(job.toString() + "_EXP"));
                 exp = Double.parseDouble(values.getFirst());
-            }
+            }rs.close();
         } catch (Exception e) {
             e.printStackTrace();
         }

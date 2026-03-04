@@ -27,6 +27,8 @@ public class Database {
             //con.prepareStatement("DROP TABLE tbl_superior_areas").execute();
             con.prepareStatement("CREATE TABLE IF NOT EXISTS tbl_superior_areas(AREA_ID varchar(20), LOC1 varchar(30), LOC2 varchar(30))").execute();
 
+            //con.prepareStatement("DROP TABLE tbl_residential").execute();
+            //con.prepareStatement("DROP TABLE tbl_residential_areas").execute();
             con.prepareStatement("CREATE TABLE IF NOT EXISTS tbl_residential(RESIDENTIAL_ID varchar(30), BUILDING_RIGHTS varchar(200), RENTER varchar(30), CITY_ID varchar(30), NAME varchar(30), RENTABLE boolean)").execute();
             con.prepareStatement("CREATE TABLE IF NOT EXISTS tbl_residential_areas(RESIDENTIAL_ID varchar(30), AREA_ID varchar(30))").execute();
             //con.prepareStatement("CREATE TABLE IF NOT EXISTS tbl_shop(SHOP_ID varchar(30), )").execute();

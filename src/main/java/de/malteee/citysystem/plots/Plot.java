@@ -19,12 +19,12 @@ public abstract class Plot {
     protected UUID owner;
     protected boolean rentable;
 
-    public Plot(String id, City city, ArrayList<Area> areas, String name) {
+    public Plot(String id, City city, ArrayList<Area> areas, String name, boolean rentable) {
         this.id = id;
         this.city = city;
         this.areas = areas;
         this.name = name;
-        this.rentable = false;
+        this.rentable = rentable;
     }
 
     public void addArea() {

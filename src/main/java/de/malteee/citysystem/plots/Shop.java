@@ -9,11 +9,11 @@ import java.util.ArrayList;
 public class Shop extends Plot implements Rentable {
 
     public Shop(String id, City city) {
-        super(id, city, null, null);
+        super(id, city, null, null, false);
     }
 
     public Shop(String id, City city, ArrayList<Area> areas) {
-        super(id, city, areas, null);
+        super(id, city, areas, null, false);
     }
 
     @Override
