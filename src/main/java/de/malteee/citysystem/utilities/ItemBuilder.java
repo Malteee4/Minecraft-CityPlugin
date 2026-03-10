@@ -6,7 +6,6 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -21,7 +20,7 @@ public class ItemBuilder {
         itemStack = new ItemStack(material, amount);
         itemMeta  = itemStack.getItemMeta();
     }
-    public ItemBuilder(final @Nonnull String itemsAdderNameSpace) {
+    public ItemBuilder(final String itemsAdderNameSpace) {
         //this.customStack = CustomStack.getInstance(itemsAdderNameSpace);
         //this.itemStack = this.customStack.getItemStack();
         this.itemStack = new ItemStack(Material.PAPER);
@@ -50,23 +49,23 @@ public class ItemBuilder {
         itemStack.setItemMeta(itemMeta);
         return itemStack;
     }
-    public ItemBuilder addEnchantment(final @Nonnull Enchantment enchantment, final int level, final boolean add) {
+    public ItemBuilder addEnchantment(final Enchantment enchantment, final int level, final boolean add) {
         if (add)
             this.itemStack.addEnchantment(enchantment, level);
         return this;
     }
 
-    public ItemBuilder removeEnchantment(final @Nonnull Enchantment enchantment) {
+    public ItemBuilder removeEnchantment(final Enchantment enchantment) {
         this.itemStack.removeEnchantment(enchantment);
         return this;
     }
 
-    public ItemBuilder addEnchantments(final @Nonnull Map<Enchantment, Integer> enchantments) {
+    public ItemBuilder addEnchantments(final Map<Enchantment, Integer> enchantments) {
         this.itemStack.addEnchantments(enchantments);
         return this;
     }
 
-    public ItemBuilder removeEnchantments(final @Nonnull Collection<Enchantment> enchantments) {
+    public ItemBuilder removeEnchantments(final Collection<Enchantment> enchantments) {
         enchantments.forEach(this.itemStack::removeEnchantment);
         return this;
     }

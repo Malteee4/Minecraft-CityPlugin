@@ -3,9 +3,11 @@ package de.malteee.citysystem.jobs;
 import de.malteee.citysystem.CitySystem;
 import de.malteee.citysystem.core.CityPlayer;
 import de.malteee.citysystem.utilities.Tools;
+import io.papermc.paper.event.player.PlayerPurchaseEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -16,6 +18,7 @@ import org.bukkit.event.block.CrafterCraftEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.inventory.PrepareItemCraftEvent;
 import org.bukkit.event.player.PlayerFishEvent;
+import org.bukkit.inventory.MerchantRecipe;
 
 import java.sql.Array;
 import java.sql.ResultSet;
@@ -181,8 +184,10 @@ public class JobManager implements Listener {
             Material block = event.getBlock().getType();
             for (Material m : job.getBlocks()) {
                 if (block.equals(m)) {
+                    if (player.getActiveItem().getItemMeta().hasEnchant(Enchantment.SILK_TOUCH))
+                        return;
                     tempPoints.put(player.getUniqueId(), tempPoints.get(player.getUniqueId()) + (job.getValue(m) * (1 + level.get(player.getUniqueId()) * 0.1)));
-                    break;
+                    return;
                 }
             }
         }
@@ -228,5 +233,23 @@ public class JobManager implements Listener {
         Player player = event.getPlayer();
         CityPlayer cPlayer = CitySystem.getCityPlayer(player);
         if (cPlayer == null) return;
+        if (!cPlayer.hasJob()) return;
+        Job job = cPlayer.getJob();
+        if (job == Job.FISHER) {
+            tempPoints.put(player.getUniqueId(), tempPoints.get(player.getUniqueId()) + (10 * (1 + level.get(player.getUniqueId()) * 0.1)));
+        }
+    }
+
+    @EventHandler
+    public void handlePlayerTrade(PlayerPurchaseEvent event) {
+        Player player = event.getPlayer();
+        CityPlayer cPlayer = CitySystem.getCityPlayer(player);
+        if (cPlayer == null) return;
+        if (!cPlayer.hasJob()) return;
+        Job job = cPlayer.getJob();
+        if (job == Job.TRADER) {
+            MerchantRecipe trade = event.getTrade();
+            tempPoints.put(player.getUniqueId(), tempPoints.get(player.getUniqueId()) + (1.4 * (1 + level.get(player.getUniqueId()) * 0.1)));
+        }
     }
 }

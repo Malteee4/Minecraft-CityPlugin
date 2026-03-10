@@ -29,15 +29,16 @@ public class Database {
 
             //con.prepareStatement("DROP TABLE tbl_residential").execute();
             //con.prepareStatement("DROP TABLE tbl_residential_areas").execute();
-            con.prepareStatement("CREATE TABLE IF NOT EXISTS tbl_residential(RESIDENTIAL_ID varchar(30), BUILDING_RIGHTS varchar(200), RENTER varchar(30), CITY_ID varchar(30), NAME varchar(30), RENTABLE boolean)").execute();
+            con.prepareStatement("CREATE TABLE IF NOT EXISTS tbl_residential(RESIDENTIAL_ID varchar(30), BUILDING_RIGHTS varchar(200), RENTER varchar(30), CITY_ID varchar(30), NAME varchar(30), RENTABLE boolean, SHOP boolean)").execute();
             con.prepareStatement("CREATE TABLE IF NOT EXISTS tbl_residential_areas(RESIDENTIAL_ID varchar(30), AREA_ID varchar(30))").execute();
             //con.prepareStatement("CREATE TABLE IF NOT EXISTS tbl_shop(SHOP_ID varchar(30), )").execute();
-            con.prepareStatement("CREATE TABLE IF NOT EXISTS tbl_shop_areas(SHOP_ID varchar(30), AREA_ID varchar(30))").execute();
+            //con.prepareStatement("CREATE TABLE IF NOT EXISTS tbl_shop_areas(SHOP_ID varchar(30), AREA_ID varchar(30))").execute();
             //con.prepareStatement("CREATE TABLE IF NOT EXISTS tbl_farm()").execute();
 
             //con.prepareStatement("DROP TABLE tbl_city").execute();
             con.prepareStatement("CREATE TABLE IF NOT EXISTS tbl_city(CITY_ID varchar(30), WELCOME_MSG varchar(100), GOODBYE_MSG varchar(100), SPAWN varchar(30), "
               + "PLAYER_ID varchar(40), DAYS_ACTIVE int, PUBLIC_SPAWN bool, BUILD_RIGHT varchar(300), EXPANSION varchar(50), STAGE varchar(20))").execute();
+            con.prepareStatement("CREATE TABLE IF NOT EXISTS tbl_city_expansions(CITY_ID varchar(30), EXPANSION_ID varchar(30))").execute();
 
             con.prepareStatement("CREATE TABLE IF NOT EXISTS tbl_city_areas(AREA_ID varchar(30), CITY_ID varchar(30))").execute();
             con.prepareStatement("CREATE TABLE IF NOT EXISTS tbl_city_residential_plots(RESIDENTIAL_ID varchar(30), CITY_ID varchar(30))").execute();

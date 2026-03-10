@@ -47,7 +47,7 @@ public class PlayerJoinListener implements Listener {
                 config.set("active." + player.getUniqueId().toString(), (config.getInt("active." + player.getUniqueId().toString()) + 1));
                 int loginBonus = (int) (10 * Math.sqrt(config.getInt("active." + player.getUniqueId().toString())) + 10);
                 CitySystem.getMm().getKonto(cPlayer).addMoney(loginBonus);
-                player.sendMessage("§aYou just got §l" + loginBonus + " Shards §r§a as your daily login bonus!");
+                player.sendMessage("§aYou just got §l" + loginBonus + " Shards §r§aas your daily login bonus!");
             }if (!active_list.contains(player.getUniqueId().toString())) {
                 active_list.add(player.getUniqueId().toString());
                 config.set("active.list", active_list);

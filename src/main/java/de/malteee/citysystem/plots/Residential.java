@@ -10,12 +10,16 @@ import java.util.ArrayList;
 
 public class Residential extends Plot implements Rentable {
 
-    public Residential(String id, City city, ArrayList<Area> areas, String name, boolean rentable, boolean create) {
+    private boolean shop;
+
+    public Residential(String id, City city, ArrayList<Area> areas, String name, boolean rentable, boolean shop, boolean create) {
         super(id, city, areas, name, rentable);
+        this.shop = shop;
         if (create) {
             try {
                 Database db = CitySystem.getDatabase();
-                db.execute("INSERT INTO tbl_residential(RESIDENTIAL_ID, BUILDING_RIGHTS, RENTER, CITY_ID, NAME, RENTABLE) VALUES('" + id + "', 'NONE', 'NONE', '" + city.getName() + "', '" + name + "', FALSE)");
+                db.execute("INSERT INTO tbl_residential(RESIDENTIAL_ID, BUILDING_RIGHTS, RENTER, CITY_ID, NAME, RENTABLE, SHOP) " +
+                        "VALUES('" + id + "', 'NONE', 'NONE', '" + city.getName() + "', '" + name + "', FALSE, FALSE)");
                 for (Area area : areas) {
                     db.execute("INSERT INTO tbl_residential_areas(RESIDENTIAL_ID, AREA_ID) VALUES('" + id + "', '" + area.getId() + "')");
                     area.setPlot(this);
@@ -23,6 +27,11 @@ public class Residential extends Plot implements Rentable {
                 }
             } catch (Exception exception) {
                 exception.printStackTrace();
+            }
+        }else {
+            for (Area area : areas) {
+                area.setPlot(this);
+                area.setCity(city);
             }
         }
         /*

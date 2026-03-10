@@ -65,6 +65,9 @@ public class CitySystem extends JavaPlugin {
     public static DecimalFormat df = new DecimalFormat("#0.00");
     private static FileConfiguration jobConfig;
 
+
+    //java -Xms10G -Xmx10G -jar paper-1.21.11-126.jar nogui
+
     public void onEnable() {
         plugin = this;
         db = new Database().connect("database");
@@ -96,10 +99,10 @@ public class CitySystem extends JavaPlugin {
         getCommand("setSpawn").setExecutor(new SetWorldSpawnCommand());
         getCommand("breakShop").setExecutor(new BreakShopCommand());
         getCommand("world").setExecutor(new WorldCreation());
-        getCommand("money").setExecutor(new MoneyCommand());
-        getCommand("money").setTabCompleter(tabCompleter);
-        getCommand("home").setExecutor(new HomeCommand());
-        getCommand("home").setTabCompleter(tabCompleter);
+        //getCommand("money").setExecutor(new MoneyCommand()); getCommand("money").setTabCompleter(tabCompleter);
+        MoneyCommand.register();
+        //getCommand("home").setExecutor(new HomeCommand()); getCommand("home").setTabCompleter(tabCompleter);
+        HomeCommand.register();
         getCommand("farmWorld").setExecutor(new FarmworldCommand());
         getCommand("mainWorld").setExecutor(new MainWorldCommand());
         getCommand("createSuperiorArea").setExecutor(new CreateSuperiorArea());
@@ -107,7 +110,8 @@ public class CitySystem extends JavaPlugin {
         getCommand("pos1").setExecutor(new PosCommand());
         getCommand("pos2").setExecutor(new PosCommand());
         getCommand("msg").setExecutor(new MsgCommand());
-        getCommand("city").setExecutor(new CityCommand());
+        //getCommand("city").setExecutor(new CityCommand());
+        CityCommand.register();
         getCommand("city").setTabCompleter(tabCompleter);
         getCommand("setMainSpawn").setExecutor(new SetMainWorldSpawnCommand());
         getCommand("tutorial").setExecutor(new TutorialCommand());
@@ -120,10 +124,12 @@ public class CitySystem extends JavaPlugin {
         getCommand("nether").setExecutor(new NetherCommand());
         getCommand("end").setExecutor(new EndCommand());
         getCommand("createPortal").setExecutor(new PortalCommand());
-        getCommand("plot").setExecutor(new PlotCommand());
+        //getCommand("plot").setExecutor(new PlotCommand());
+        PlotCommand.register();
         getCommand("shop").setExecutor(new ShopCommand());
         getCommand("rank").setExecutor(new RankCommand());
         getCommand("nextDay").setExecutor(new Timer());
+        getCommand("map").setExecutor(new MapCommand());
 
         for(int i = 0; i < maps.size(); i++) {
             if (maps.get(i).equalsIgnoreCase("mainWorld")) {
@@ -171,12 +177,12 @@ public class CitySystem extends JavaPlugin {
             }catch (Exception exception) {
                 exception.printStackTrace();
             }
+            new Border(new Location(farmWorld, 0, 100, 0), 2400);
+            new Border(new Location(netherWorld, 0, 100, 0), 1200);
         }, 160);
 
         //new Border(new Location(mainWorld, -520, 100, -1000), 18100);
         //mainWorld.getWorldBorder().reset();
-        new Border(new Location(farmWorld, 0, 100, 0), 2400);
-        new Border(new Location(netherWorld, 0, 100, 0), 1200);
         //new Border(new Location(spawnWorld, 600, 100, 1700), 2500);
         //spawnWorld.getWorldBorder().reset();
         //new Timer();

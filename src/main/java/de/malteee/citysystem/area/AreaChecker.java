@@ -13,7 +13,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerMoveEvent;
-import org.checkerframework.checker.units.qual.C;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
@@ -109,7 +108,7 @@ public class AreaChecker implements Listener {
                                         player.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy(entered.getWelcomeMessage()));
                                         continue;
                                     }
-                                    if (old.getType().equals(Area.AreaType.CITY) ||old.getType().equals(Area.AreaType.PLOT)) {
+                                    if (old.getType().equals(Area.AreaType.CITY) || old.getType().equals(Area.AreaType.PLOT)) {
                                         City oldCity = old.getCity();
                                         if (oldCity.equals(entered))
                                             continue;

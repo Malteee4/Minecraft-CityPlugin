@@ -25,7 +25,7 @@ public class City implements Listener {
 
     private List<Area> areas = new ArrayList<>();
     private List<Residential> plots = new ArrayList<>();
-    private List<Shop> shops = new ArrayList<>();
+    @Deprecated private List<Shop> shops = new ArrayList<>();
 
     private double totalIncome, experience;
     private int daysActive, s;
@@ -84,6 +84,9 @@ public class City implements Listener {
             }
             rs.close();
             this.name = id;
+            rs = CitySystem.getDatabase().getResult("SELECT * FROM tbl_city_expansions WHERE CITY_ID='" + name + "'");
+            while (rs.next())
+                this.expansions.add(Expansion.valueOf(rs.getString("EXPANSION_ID")));
         }catch (Exception exception) {
             exception.printStackTrace();
         }
@@ -138,6 +141,10 @@ public class City implements Listener {
         return expansions.contains(expansion);
     }
 
+    public void addExpansion(Expansion expansion) {
+        //TODO
+    }
+
     public void addArea(Area area) {
         CitySystem.getDatabase().execute("INSERT INTO tbl_city_areas(CITY_ID, AREA_ID) VALUES('" + name + "', '" + area.getId() + "')");
         this.areas.add(area);
@@ -164,6 +171,7 @@ public class City implements Listener {
         this.plots.add(residential);
     }
 
+    @Deprecated
     public List<Shop> getShops() {
         return shops;
     }

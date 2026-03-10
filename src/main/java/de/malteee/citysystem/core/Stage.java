@@ -2,29 +2,29 @@ package de.malteee.citysystem.core;
 
 public enum Stage {
 
-        SETTLEMENT(2, 0, 0, "Settlement"),
-        VILLAGE(4, 1, 0, "Village"),
-        SMALL_TOWN(8, 4, 1, "Small Town"),
-        CITY(15, 8, 2, "City"),
-        BIG_CITY(20, 10, 2, "Big City"),
-        METROPOLIS(28, 14, 4, "Metropolis");
+        SETTLEMENT(0, 0, "Settlement", 2500),
+        VILLAGE(1, 0, "Village", 9000),
+        SMALL_TOWN(4, 1, "Small Town", 20000),
+        CITY(8, 2, "City", 35000),
+        BIG_CITY(10, 2, "Big City", 60000),
+        METROPOLIS(14, 4, "Metropolis", 100000);
 
-        private int residential, shops, farms;
+        private int shops, farms, maxSize;
         private String display;
 
-        Stage(int residential, int shops, int farms, String display) {
-            this.residential = residential;
+        Stage(int shops, int farms, String display, int maxSize) {
             this.shops = shops;
             this.farms = farms;
             this.display = display;
+            this.maxSize = maxSize;
         }
 
         public String getDisplay() {
             return display;
         }
 
-        public int getResidential() {
-            return residential;
+        public int getMaxSize() {
+            return maxSize;
         }
 
         public int getShops() {

@@ -52,8 +52,6 @@ public class PlayerManipulateWorldListener implements Listener {
         return false;
     }
 
-    //TODO: check fishing and mob killing
-
     @EventHandler
     public void handlePlayerBreakBlock(BlockBreakEvent event) {
         Player player = event.getPlayer();
@@ -69,13 +67,21 @@ public class PlayerManipulateWorldListener implements Listener {
                     return;
                 }else {
                     cPlayer.setBlocksWilderness(cPlayer.getBlocksInWilderness() + 1);
+                    int r = new Random().nextInt(6);
+                    if (r != 0)
+                        event.setDropItems(false);
                 }
             }
             if (mainNotDropable.contains(event.getBlock().getType()))
                 event.setDropItems(false);
         }
-        if (player.getWorld().equals(CitySystem.farmWorld))
-            event.setCancelled(jobCheck(cPlayer, event.getBlock().getType()));
+        if (player.getWorld().equals(CitySystem.farmWorld)) {
+            if (jobCheck(cPlayer, event.getBlock().getType())) {
+                int r = new Random().nextInt(4);
+                if (r != 0)
+                    event.setDropItems(false);
+            }
+        }
     }
 
     @EventHandler

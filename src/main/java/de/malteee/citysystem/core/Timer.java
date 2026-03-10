@@ -85,8 +85,10 @@ public class Timer implements CommandExecutor {
             for (OfflinePlayer off : Bukkit.getOfflinePlayers()) {
                 Konto konto = mm.getKonto(off.getUniqueId());
                 if (konto == null) continue;
-                if (konto.getMot() < MOT_MAX) {
-                    konto.addMot(konto.motPerMinute);
+                if (off.isOnline()) {
+                    if (konto.getMot() < MOT_MAX) {
+                        konto.addMot(konto.motPerMinute);
+                    }
                 }
                 if (reset) {
                     konto.clearMot();

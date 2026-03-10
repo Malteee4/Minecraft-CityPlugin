@@ -6,6 +6,7 @@ import de.malteee.citysystem.core.CityPlayer;
 
 import java.util.ArrayList;
 
+@Deprecated
 public class Shop extends Plot implements Rentable {
 
     public Shop(String id, City city) {

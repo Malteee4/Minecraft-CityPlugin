@@ -10,7 +10,6 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -19,38 +18,38 @@ import java.util.function.Consumer;
 
 public class InventoryBuilder implements Listener {
 
-    private final @Nonnull Inventory inventory;
+    private final Inventory inventory;
     private final Map<Integer, Consumer<InventoryClickEvent>> clickActions;
     private Runnable closeAction;
     private final Player player;
 
-    public InventoryBuilder(final int inventorySize, final @Nonnull String inventoryName, Player player) {
+    public InventoryBuilder(final int inventorySize, final String inventoryName, Player player) {
         this.inventory = Bukkit.createInventory(null, inventorySize, inventoryName);
         this.clickActions = new HashMap<>();
         this.player = player;
         Bukkit.getPluginManager().registerEvents(this, CitySystem.getPlugin());
     }
 
-    public InventoryBuilder setSlot(final int slot, final @Nonnull ItemStack itemStack) {
+    public InventoryBuilder setSlot(final int slot, final ItemStack itemStack) {
         this.clickActions.remove(slot);
         this.inventory.setItem(slot, itemStack);
         return this;
     }
 
-    public InventoryBuilder setSlot(final int slot, final @Nonnull ItemStack itemStack, final @Nonnull Consumer<InventoryClickEvent> inventoryClickEvent) {
+    public InventoryBuilder setSlot(final int slot, final ItemStack itemStack, final Consumer<InventoryClickEvent> inventoryClickEvent) {
         this.clickActions.remove(slot);
         this.inventory.setItem(slot, itemStack);
         this.clickActions.put(slot, inventoryClickEvent);
         return this;
     }
 
-    public InventoryBuilder setSlots(final @Nonnull ItemStack itemStack, final @Nonnull int... slots) {
+    public InventoryBuilder setSlots(final ItemStack itemStack, final int... slots) {
         for (int i : slots)
             this.inventory.setItem(i, itemStack);
         return this;
     }
 
-    public InventoryBuilder setSlot(final int slot, final @Nonnull ItemStack itemStack, boolean set) {
+    public InventoryBuilder setSlot(final int slot, final ItemStack itemStack, boolean set) {
         if (set) {
             this.clickActions.remove(slot);
             this.inventory.setItem(slot, itemStack);
@@ -58,13 +57,13 @@ public class InventoryBuilder implements Listener {
         return this;
     }
 
-    public InventoryBuilder addItem(final @Nonnull ItemStack itemStack) {
+    public InventoryBuilder addItem(final ItemStack itemStack) {
         this.inventory.addItem(itemStack);
         this.clickActions.remove(this.inventory.first(itemStack));
         return this;
     }
 
-    public InventoryBuilder addItem(final @Nonnull ItemStack itemStack, final @Nonnull Consumer<InventoryClickEvent> inventoryClickEvent) {
+    public InventoryBuilder addItem(final ItemStack itemStack, final Consumer<InventoryClickEvent> inventoryClickEvent) {
         this.inventory.addItem(itemStack);
         final int slot = this.inventory.first(itemStack);
         this.clickActions.remove(slot);
@@ -82,7 +81,7 @@ public class InventoryBuilder implements Listener {
         this.inventory.clear();
     }
 
-    public void addCloseAction(final @Nonnull Runnable closeAction) {
+    public void addCloseAction(final Runnable closeAction) {
         this.closeAction = closeAction;
     }
 

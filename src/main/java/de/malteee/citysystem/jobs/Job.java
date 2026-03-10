@@ -22,6 +22,7 @@ public enum Job {
     NONE("None");
 
     public static final ArrayList<Material> allJobBlocks = new ArrayList<>();
+    public static final ArrayList<EntityType> allEntityTypes = new ArrayList<>();
     private final FileConfiguration config = CitySystem.getJobConfig();
 
     static {
@@ -31,8 +32,13 @@ public enum Job {
                 conf.set(job.toString() + ".materialList", new ArrayList<String>());
                 CitySystem.saveJobConfig();
             }
-            for (String str : conf.getStringList(job.toString() + ".materialList"))
-                allJobBlocks.add(Material.valueOf(str));
+            if (job == HUNTER || job == FISHER) {
+                for (String str : conf.getStringList(job.toString() + ".materialList"))
+                    allEntityTypes.add(EntityType.valueOf(str));
+            }else {
+                for (String str : conf.getStringList(job.toString() + ".materialList"))
+                    allJobBlocks.add(Material.valueOf(str));
+            }
         }
     }
 
@@ -61,6 +67,16 @@ public enum Job {
     public List<Material> getInvertedBlocks() {
         ArrayList<Material> list = (ArrayList<Material>) allJobBlocks.clone();
         list.removeAll(blocks);
+        return list;
+    }
+
+    public List<EntityType> getEntities() {
+        return entities;
+    }
+
+    public List<EntityType> getInvertedEntities() {
+        ArrayList<EntityType> list = (ArrayList<EntityType>) allEntityTypes.clone();
+        list.removeAll(entities);
         return list;
     }
 

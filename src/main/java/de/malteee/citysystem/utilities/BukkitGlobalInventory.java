@@ -10,7 +10,6 @@ import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 
-import javax.annotation.Nonnull;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -18,12 +17,12 @@ import java.util.Map;
 import java.util.function.Consumer;
 
 public final class BukkitGlobalInventory implements Listener {
-    private final @Nonnull Inventory inventory;
+    private final Inventory inventory;
     private final Map<Integer, Consumer<InventoryClickEvent>> clickActions;
     private final Map<Player, Runnable> closeActions;
     private final Collection<Player> playersOpened;
 
-    public BukkitGlobalInventory(final int inventorySize, final @Nonnull String inventoryName) {
+    public BukkitGlobalInventory(final int inventorySize, final String inventoryName) {
         this.inventory = Bukkit.createInventory(null, inventorySize, inventoryName);
         this.clickActions = new HashMap<>();
         this.closeActions = new HashMap<>();
@@ -31,26 +30,26 @@ public final class BukkitGlobalInventory implements Listener {
         Bukkit.getPluginManager().registerEvents(this, CitySystem.getPlugin());
     }
 
-    public BukkitGlobalInventory setSlot(final int slot, final @Nonnull ItemStack itemStack) {
+    public BukkitGlobalInventory setSlot(final int slot, final ItemStack itemStack) {
         this.clickActions.remove(slot);
         this.inventory.setItem(slot, itemStack);
         return this;
     }
 
-    public BukkitGlobalInventory setSlot(final int slot, final @Nonnull ItemStack itemStack, final @Nonnull Consumer<InventoryClickEvent> inventoryClickEvent) {
+    public BukkitGlobalInventory setSlot(final int slot, final ItemStack itemStack, final Consumer<InventoryClickEvent> inventoryClickEvent) {
         this.clickActions.remove(slot);
         this.inventory.setItem(slot, itemStack);
         this.clickActions.put(slot, inventoryClickEvent);
         return this;
     }
 
-    public BukkitGlobalInventory addItem(final @Nonnull ItemStack itemStack) {
+    public BukkitGlobalInventory addItem(final ItemStack itemStack) {
         this.inventory.addItem(itemStack);
         this.clickActions.remove(this.inventory.first(itemStack));
         return this;
     }
 
-    public BukkitGlobalInventory addItem(final @Nonnull ItemStack itemStack, final @Nonnull Consumer<InventoryClickEvent> inventoryClickEvent) {
+    public BukkitGlobalInventory addItem(final ItemStack itemStack, final Consumer<InventoryClickEvent> inventoryClickEvent) {
         this.inventory.addItem(itemStack);
         final int slot = this.inventory.first(itemStack);
         this.clickActions.remove(slot);
@@ -68,15 +67,15 @@ public final class BukkitGlobalInventory implements Listener {
         this.inventory.clear();
     }
 
-    public void addCloseAction(final @Nonnull Player player, final @Nonnull Runnable closeAction) {
+    public void addCloseAction(final Player player, final Runnable closeAction) {
         this.closeActions.put(player, closeAction);
     }
 
-    public void removeCloseAction(final @Nonnull Player playerKey) {
+    public void removeCloseAction(final Player playerKey) {
         this.closeActions.remove(playerKey);
     }
 
-    public void open(final @Nonnull Player player) {
+    public void open(final Player player) {
         player.openInventory(this.inventory);
         this.playersOpened.add(player);
     }
@@ -85,12 +84,12 @@ public final class BukkitGlobalInventory implements Listener {
         this.closeActions.clear();
     }
 
-    public void clearCloseActions(final @Nonnull Player player) {
+    public void clearCloseActions(final Player player) {
         if (!this.playersOpened.contains(player)) return;
         this.closeActions.remove(player);
     }
 
-    public void close(final @Nonnull Player player) {
+    public void close(final Player player) {
         player.closeInventory();
         this.playersOpened.remove(player);
     }

@@ -13,7 +13,7 @@ public class PlotManager {
 
     private HashSet<FarmingPlot> farmingPlots = new HashSet<>();
     private HashSet<Residential> residentialPlots = new HashSet<>();
-    private HashSet<Shop> shopPlots = new HashSet<>();
+    @Deprecated private HashSet<Shop> shopPlots = new HashSet<>();
 
     public PlotManager() {
         initializeFarmPlots();
@@ -33,7 +33,7 @@ public class PlotManager {
                 rs1.close();
                 if (areas.isEmpty()) continue;
                 City city = areas.getFirst().getCity();
-                residentialPlots.add(new Residential(id, city, areas, rs.getString("NAME"), rs.getBoolean("RENTABLE"), false));
+                residentialPlots.add(new Residential(id, city, areas, rs.getString("NAME"), rs.getBoolean("RENTABLE"), rs.getBoolean("SHOP"), false));
             }rs.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -60,7 +60,7 @@ public class PlotManager {
         return residentialPlots;
     }
 
-    public HashSet<Shop> getShopPlots() {
+    @Deprecated public HashSet<Shop> getShopPlots() {
         return shopPlots;
     }
 }

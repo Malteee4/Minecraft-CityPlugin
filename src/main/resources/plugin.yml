@@ -1,8 +1,9 @@
 name: CitySystem
-version: 0.1
+version: 1.0
 main: de.malteee.citysystem.CitySystem
 author: Malteee
 api-version: 1.21
+depend: [CommandAPI]
 
 commands:
   spawn:
@@ -63,3 +64,5 @@ commands:
     description: admin use only
   nextDay:
     description: admin use only
+  map:
+    description: open the server web map

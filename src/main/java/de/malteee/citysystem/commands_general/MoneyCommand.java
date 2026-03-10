@@ -1,17 +1,88 @@
 package de.malteee.citysystem.commands_general;
 
+import com.destroystokyo.paper.profile.PlayerProfile;
 import de.malteee.citysystem.CitySystem;
 import de.malteee.citysystem.core.CityPlayer;
 import de.malteee.citysystem.money_system.Konto;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
+import dev.jorel.commandapi.CommandAPICommand;
+import dev.jorel.commandapi.arguments.*;
+import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
+import java.util.ArrayList;
+import java.util.Arrays;
 
-import java.text.ParseException;
+public class MoneyCommand {
 
-public class MoneyCommand implements CommandExecutor {
-
+    public static void register() {
+        Argument<?> noSelectorSuggestions = new PlayerProfileArgument("target")
+                .replaceSafeSuggestions(SafeSuggestions.suggest(info ->
+                        Arrays.stream(Bukkit.getOfflinePlayers()).map(OfflinePlayer::getPlayerProfile).toArray(PlayerProfile[]::new)
+                ));
+        new CommandAPICommand("money")
+                .withSubcommand(new CommandAPICommand("send")
+                        .withArguments(noSelectorSuggestions, new DoubleArgument("money"))
+                        .executesPlayer((player, args) -> {
+                            CityPlayer cPlayer = CitySystem.getCityPlayer(player);
+                            if (cPlayer == null) return;
+                            String target = ((ArrayList<PlayerProfile>) args.get("target")).get(0).getName();
+                            if (CitySystem.getMm().getKonto(target) == null) {
+                                player.sendMessage("§cThis player doesn't exist on the server!");
+                                return;
+                            }
+                            if (player.getName().equalsIgnoreCase(target)) {
+                                player.sendMessage("§cYou can not send money to yourself!");
+                                return;
+                            }
+                            double money = 0;
+                            double senderMoney = CitySystem.getMm().getKonto(cPlayer).getMoney();
+                            try {
+                                money = (double) args.get("money");
+                            }catch (NumberFormatException e) {
+                                player.sendMessage("§cInvalid value!");
+                                return;
+                            }if (money > senderMoney) {
+                                player.sendMessage("§cYou don't have enough Shards!");
+                                return;
+                            }
+                            player.sendMessage("§aUse §l/money send " + target + " " + money + " confirm§r§a to confirm your transaction!");
+                        }).withSubcommand(new CommandAPICommand("confirm")
+                                .executesPlayer(((player, args) -> {
+                                    CityPlayer cPlayer = CitySystem.getCityPlayer(player);
+                                    if (cPlayer == null) return;
+                                    String target = ((ArrayList<PlayerProfile>) args.get("target")).get(0).getName();
+                                    double money = 0;
+                                    double senderMoney = CitySystem.getMm().getKonto(cPlayer).getMoney();
+                                    if (CitySystem.getMm().getKonto(target) == null) {
+                                        player.sendMessage("§cThis player doesn't exist on the server!");
+                                        return;
+                                    }
+                                    if (player.getName().equalsIgnoreCase(target)) {
+                                        player.sendMessage("§cYou can not send money to yourself!");
+                                        return;
+                                    }
+                                    try {
+                                        money = (double) args.get("money");
+                                    }catch (NumberFormatException e) {
+                                        player.sendMessage("§cInvalid value!");
+                                        return;
+                                    }if (money > senderMoney) {
+                                        player.sendMessage("§cYou don't have enough Shards!");
+                                        return;
+                                    }
+                                    Konto receiver = CitySystem.getMm().getKonto(target);
+                                    Konto senderKonto = CitySystem.getMm().getKonto(cPlayer);
+                                    receiver.addMoney(money);
+                                    senderKonto.removeMoney(money);
+                                    player.sendMessage("§aShards sent!");
+                                    //TODO receiver message
+                                }))))
+                .executesPlayer((player, args) -> {
+                    CityPlayer cPlayer = CitySystem.getCityPlayer(player);
+                    if (cPlayer == null) return;
+                    player.sendMessage("§aYour current balance is: §l" + CitySystem.df.format(CitySystem.getMm().getKonto(cPlayer).getMoney()) + " Shards");
+                }).register();
+    }
+    /*
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player player)) return false;
@@ -73,5 +144,5 @@ public class MoneyCommand implements CommandExecutor {
             //TODO: error message
         }
         return false;
-    }
+    }*/
 }
