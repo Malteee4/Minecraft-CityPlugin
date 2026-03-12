@@ -13,13 +13,13 @@ import java.util.List;
 
 public enum Job {
 
-    BUILDER("Builder"),
-    HUNTER("Hunter"),
-    LUMBERJACK("Lumberjack"), //everything with wood, planks, log
-    MINER("Miner"),
-    TRADER("Trader"), //Villager
-    FISHER("Fisher"),
-    NONE("None");
+    BUILDER("Builder", true, false),
+    HUNTER("Hunter", false, true),
+    LUMBERJACK("Lumberjack", true, false), //everything with wood, planks, log
+    MINER("Miner", true, false),
+    TRADER("Trader", true, false), //Villager
+    FISHER("Fisher", false, true),
+    NONE("None", false, false);
 
     public static final ArrayList<Material> allJobBlocks = new ArrayList<>();
     public static final ArrayList<EntityType> allEntityTypes = new ArrayList<>();
@@ -46,14 +46,18 @@ public enum Job {
     private List<EntityType> entities = new ArrayList<>(); //for Hunter and Fisher
     private String display;
 
-    Job(String display) {
+    Job(String display, boolean material, boolean entity) {
         this.display = display;
         if (!config.contains(this.toString() + ".materialList")) {
             config.set(this.toString() + ".materialList", new ArrayList<String>());
             CitySystem.saveJobConfig();
         }
-        for (String str : config.getStringList(this.toString() + ".materialList"))
-            blocks.add(Material.valueOf(str));
+        if (material)
+            for (String str : config.getStringList(this.toString() + ".materialList"))
+                blocks.add(Material.valueOf(str));
+        if (entity)
+            for (String str : config.getStringList(this.toString() + ".materialList"))
+                entities.add(EntityType.valueOf(str));
     }
 
     public String getDisplayName() {
@@ -81,6 +85,14 @@ public enum Job {
     }
 
     public double getValue(Material material) {
+        if (!config.contains(this.toString() + ".material." + material.toString())) {
+            config.set(this.toString() + ".material." + material.toString(), 1.0);
+            CitySystem.saveJobConfig();
+        }
+        return config.getDouble(this.toString() + ".material." + material.toString());
+    }
+
+    public double getValue(EntityType material) {
         if (!config.contains(this.toString() + ".material." + material.toString())) {
             config.set(this.toString() + ".material." + material.toString(), 1.0);
             CitySystem.saveJobConfig();

@@ -7,10 +7,13 @@ import de.malteee.citysystem.area.Area;
 import de.malteee.citysystem.plots.Residential;
 import de.malteee.citysystem.utilities.Rank;
 import de.malteee.citysystem.utilities.Tools;
+import net.kyori.adventure.text.Component;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
+import java.nio.Buffer;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
@@ -133,6 +136,16 @@ public class CityPlayer {
 
     public void setJob(Job job) {
         FileConfiguration config = CitySystem.getPlugin().getConfig();
+        Job lastRealJob = this.job;
+        if (job == Job.NONE) {
+            config.set("lastJob." + player.getUniqueId(), this.job.toString());
+            lastRealJob = this.job;
+            CitySystem.getPlugin().saveConfig();
+        }else if(this.job == Job.NONE) {
+            if (config.contains("lastJob." + player.getUniqueId()))
+                lastRealJob = Job.valueOf(config.getString("lastJob." + player.getUniqueId()));
+        }
+
         if (!config.contains("job_cooldown." + uuid.toString())) {
             if (!config.contains("job_cooldown.list")) {
                 List<String> list = new ArrayList<>();
@@ -143,11 +156,14 @@ public class CityPlayer {
                 list.add(uuid.toString());
                 config.set("job_cooldown.list", list);
             }
+            CitySystem.getPlugin().saveConfig();
         }
         if (job != Job.NONE) {
-            config.set("job_cooldown." + uuid.toString(), 5);
-            CitySystem.getPlugin().saveConfig();
-            jobCooldown = 5;
+            if (job != lastRealJob) {
+                config.set("job_cooldown." + uuid.toString(), 5);
+                CitySystem.getPlugin().saveConfig();
+                jobCooldown = 5;
+            }
         }
         try {
             CitySystem.getDatabase().execute("UPDATE tbl_players SET JOB='" + job.toString() + "' WHERE PLAYER_ID='" + this.uuid.toString() + "'");
@@ -203,5 +219,17 @@ public class CityPlayer {
 
     public Rank getRank() {
        return rank;
+    }
+
+    public void setPlot(Residential residential) {
+       this.residential = residential;
+    }
+
+    public Residential getPlot() {
+       return residential;
+    }
+
+    public boolean hasPlot() {
+       return residential != null;
     }
 }

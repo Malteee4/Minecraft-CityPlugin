@@ -7,19 +7,22 @@ import de.malteee.citysystem.core.CityPlayer;
 import de.malteee.citysystem.core.Database;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
-public class Residential extends Plot implements Rentable {
+public class Residential extends Plot {
 
     private boolean shop;
+    private double rent = 0;
 
-    public Residential(String id, City city, ArrayList<Area> areas, String name, boolean rentable, boolean shop, boolean create) {
+    public Residential(String id, City city, ArrayList<Area> areas, String name, double rent, boolean rentable, boolean shop, boolean create) {
         super(id, city, areas, name, rentable);
         this.shop = shop;
+        this.rent = rent;
         if (create) {
             try {
                 Database db = CitySystem.getDatabase();
-                db.execute("INSERT INTO tbl_residential(RESIDENTIAL_ID, BUILDING_RIGHTS, RENTER, CITY_ID, NAME, RENTABLE, SHOP) " +
-                        "VALUES('" + id + "', 'NONE', 'NONE', '" + city.getName() + "', '" + name + "', FALSE, FALSE)");
+                db.execute("INSERT INTO tbl_residential(RESIDENTIAL_ID, BUILDING_RIGHTS, RENTER, CITY_ID, NAME, RENTABLE, SHOP, RENT) " +
+                        "VALUES('" + id + "', 'NONE', 'NONE', '" + city.getName() + "', '" + name + "', FALSE, FALSE, 0)");
                 for (Area area : areas) {
                     db.execute("INSERT INTO tbl_residential_areas(RESIDENTIAL_ID, AREA_ID) VALUES('" + id + "', '" + area.getId() + "')");
                     area.setPlot(this);
@@ -40,7 +43,6 @@ public class Residential extends Plot implements Rentable {
          */
     }
 
-    @Override
     public void setRentable(boolean val) {
         super.rentable = val;
         try {
@@ -50,23 +52,60 @@ public class Residential extends Plot implements Rentable {
         }
     }
 
-    @Override
     public void startRenting(CityPlayer player) {
-
+        this.owner = player.toPlayer().getUniqueId();
+        try {
+            CitySystem.getDatabase().execute("UPDATE tbl_residential SET RENTER='" + owner + "' WHERE RESIDENTIAL_ID='" + super.id + "'");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    @Override
+    public void setRenter(UUID uuid) {
+        this.owner = uuid;
+    }
+
+    public UUID getRenter() {
+        return this.owner;
+    }
+
     public void stopRenting() {
 
     }
 
-    @Override
-    public void setRent(int i) {
-
+    public void setRent(double i) {
+        this.rent = i;
+        try {
+            CitySystem.getDatabase().execute("UPDATE tbl_residential SET RENT=" + i + " WHERE RESIDENTIAL_ID='" + super.id + "'");
+        }catch (Exception ex) {
+            ex.printStackTrace();
+        }
     }
 
     @Override
-    public int getRent() {
-        return 0;
+    public void setName(String name) {
+        super.setName(name);
+        try {
+            CitySystem.getDatabase().execute("UPDATE tbl_residential SET NAME='" + name + "' WHERE RESIDENTIAL_ID='" + super.id + "'");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public double getRent() {
+        return this.rent;
+    }
+
+    public boolean hasShopLicense() {
+        return shop;
+    }
+
+    public void setShopLicense(boolean shop) {
+        this.shop = shop;
+        try {
+            CitySystem.getDatabase().execute("UPDATE tbl_residential SET SHOP=" + (shop ? "TRUE":"FALSE") + " WHERE RESIDENTIAL_ID='" + super.id + "'");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

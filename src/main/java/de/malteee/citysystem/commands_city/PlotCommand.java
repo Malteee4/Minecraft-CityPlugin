@@ -9,12 +9,15 @@ import de.malteee.citysystem.plots.Plot;
 import de.malteee.citysystem.plots.Residential;
 import dev.jorel.commandapi.CommandAPICommand;
 import dev.jorel.commandapi.arguments.BooleanArgument;
+import dev.jorel.commandapi.arguments.DoubleArgument;
 import dev.jorel.commandapi.arguments.IntegerArgument;
+import dev.jorel.commandapi.arguments.StringArgument;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
@@ -44,7 +47,21 @@ public class PlotCommand {
                             }
                             Plot currentPlot = cPlayer.getCurrentArea().getPlot();
                             if (currentPlot instanceof Residential residentialPlot) {
-                                player.sendMessage("§oResidential Plot:\n" + residentialPlot.getName());
+                                City c = residentialPlot.getCity();
+                                if (c.getOwner().equals(player.getUniqueId())) {
+                                    player.sendMessage("§2" + residentialPlot.getName() + ":");
+                                    player.sendMessage(" §7base area: §o" + residentialPlot.getSize() + " block" + (residentialPlot.getSize() == 1 ? "":"s"));
+                                    player.sendMessage(" §7rentable: §o" + (residentialPlot.isRentable() ? "yes":"no"));
+                                    player.sendMessage(" §7rent: §o" + (residentialPlot.isRentable() ? (residentialPlot.getRent() + " Shard" + (residentialPlot.getRent() == 1 ? "":"s")):"not rentable"));
+                                    player.sendMessage(" §7renter: §o" + ((residentialPlot.getRenter() == null) ? "none":Bukkit.getOfflinePlayer(residentialPlot.getRenter()).getName()));
+                                    player.sendMessage(" §7");
+                                    player.sendMessage(" §7");
+                                }else {
+                                    player.sendMessage("§2Residential Plot - \n" + residentialPlot.getName() + ":");
+                                    player.sendMessage(" §7base area: §o" + residentialPlot.getSize() + " block" + (residentialPlot.getSize() == 1 ? "":"s"));
+                                    player.sendMessage(" §7rent: §o" + (residentialPlot.isRentable() ? (residentialPlot.getRent() + " Shard" + (residentialPlot.getRent() == 1 ? "":"s")):"not rentable"));
+                                    player.sendMessage(" §7renter: §o" + ((residentialPlot.getRenter() == null) ? "none":Bukkit.getOfflinePlayer(residentialPlot.getRenter()).getName()));
+                                }
                             }else {
                                 player.sendMessage("§cNot a residential plot!");
                             }
@@ -167,7 +184,7 @@ public class PlotCommand {
                                     for (Location[] locations : list)
                                         areas.add(new Area(locations[0], locations[1], Area.AreaType.PLOT, AreaChecker.getSuperiorByLocation(locations[0]), true));
                                     city.addResidentialPlot(new Residential("PLOT-" + areas.getFirst().getLocOne().toString(), city, areas,
-                                            city.getName().toUpperCase() + "-PLOT" + (city.getPlots().size() + 1), false, false, true));
+                                            city.getName().toUpperCase() + "-PLOT" + (city.getPlots().size() + 1), 0, false, false, true));
                                     player.sendMessage("§aPlot has been created!");
                                     stop(player);
                                 }))
@@ -234,10 +251,56 @@ public class PlotCommand {
                                     }
                                 }))
                 )
-                .withSubcommand(new CommandAPICommand("rent"))
+                .withSubcommand(new CommandAPICommand("rent")
+                        .executesPlayer((player, args) -> {
+                            CityPlayer cPlayer = CitySystem.getCityPlayer(player);
+                            if (cPlayer == null) return;
+                            if (cPlayer.hasPlot()) {
+                                player.sendMessage("§cYou already have a plot!");
+                                return;
+                            }
+                        }))
+                .withSubcommand(new CommandAPICommand("stopRent")
+                        .executesPlayer(((player, args) -> {
+
+                        })))
                 .withSubcommand(new CommandAPICommand("rentable")
                         .withArguments(new BooleanArgument("rentable"))
                         .executesPlayer((player, args) -> {
+                            CityPlayer cPlayer = CitySystem.getCityPlayer(player);
+                            if (cPlayer == null) return;
+                            if (args.get("rentable") == null) return;
+                            boolean rentable = (boolean) args.get("rentable");
+                            if (cPlayer.getCurrentArea() == null) {
+                                player.sendMessage("§cYou're not standing on a plot!");
+                                return;
+                            }
+                            if (!cPlayer.getCurrentArea().getType().equals(Area.AreaType.PLOT)) {
+                                player.sendMessage("§cYou're not standing on a plot!");
+                                return;
+                            }
+                            Plot currentPlot = cPlayer.getCurrentArea().getPlot();
+                            if (currentPlot instanceof Residential residentialPlot) {
+                                if (residentialPlot.getCity().getOwner().equals(cPlayer.toPlayer().getUniqueId())) {
+                                    residentialPlot.setRentable(rentable);
+                                    player.sendMessage("§aThe plot is now " + (rentable ? "":"not ") + "rentable!");
+                                }else {
+                                    player.sendMessage("§cYou're not the owner of this plot!");
+                                }
+                            }else {
+                                player.sendMessage("§cNot a residential plot!");
+                            }
+                        })
+                )
+                .withSubcommand(new CommandAPICommand("edit"))
+                .withSubcommand(new CommandAPICommand("setRent")
+                        .withArguments(new DoubleArgument("rent"))
+                        .executesPlayer((player, args) -> {
+                            double rent = (double) args.get("rent");
+                            if (rent < 0.5) {
+                                player.sendMessage("§cThe rent can't be lower then 0.5 Shards!");
+                                return;
+                            }
                             CityPlayer cPlayer = CitySystem.getCityPlayer(player);
                             if (cPlayer == null) return;
                             if (cPlayer.getCurrentArea() == null) {
@@ -250,15 +313,21 @@ public class PlotCommand {
                             }
                             Plot currentPlot = cPlayer.getCurrentArea().getPlot();
                             if (currentPlot instanceof Residential residentialPlot) {
-
-
+                                if (residentialPlot.getCity().getOwner().equals(cPlayer.toPlayer().getUniqueId())) {
+                                    residentialPlot.setRent(rent);
+                                    player.sendMessage("§aThe rent of this plot has been set to §l" + rent + " Shard" + (rent == 1 ? "":"s")  + "§r§a!");
+                                }else {
+                                    player.sendMessage("§cYou're not the owner of this plot!");
+                                }
                             }else {
                                 player.sendMessage("§cNot a residential plot!");
                             }
-                        })
-                )
-                .withSubcommand(new CommandAPICommand("edit"))
-                .withSubcommand(new CommandAPICommand("setRent"))
+                        }))
+                .withSubcommand(new CommandAPICommand("setName")
+                        .withArguments(new StringArgument("name"))
+                        .executesPlayer((player, args) -> {
+
+                        }))
                 .register();
     }
 

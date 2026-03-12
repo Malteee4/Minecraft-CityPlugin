@@ -4,10 +4,12 @@ import de.malteee.citysystem.CitySystem;
 import de.malteee.citysystem.area.Area;
 import de.malteee.citysystem.area.AreaChecker;
 import de.malteee.citysystem.core.City;
+import de.malteee.citysystem.core.CityPlayer;
 
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.UUID;
 
 public class PlotManager {
 
@@ -18,7 +20,6 @@ public class PlotManager {
     public PlotManager() {
         initializeFarmPlots();
         initializeResidentialPlots();
-        initializeShopPlots();
     }
 
     public void initializeResidentialPlots() {
@@ -32,18 +33,22 @@ public class PlotManager {
                     areas.add(AreaChecker.getAreaByID(rs1.getString("AREA_ID")));
                 rs1.close();
                 if (areas.isEmpty()) continue;
-                City city = areas.getFirst().getCity();
-                residentialPlots.add(new Residential(id, city, areas, rs.getString("NAME"), rs.getBoolean("RENTABLE"), rs.getBoolean("SHOP"), false));
+                City city = CitySystem.getCm().getCity(rs.getString("CITY_ID"));
+                Residential r = new Residential(id, city, areas, rs.getString("NAME"), rs.getDouble("RENT"), rs.getBoolean("RENTABLE"), rs.getBoolean("SHOP"), false);
+                residentialPlots.add(r);
+                if (!rs.getString("RENTER").equals("NONE")) {
+                    try {
+                        CityPlayer cPlayer = CitySystem.getCityPlayer(UUID.fromString(rs.getString("RENTER")));
+                        if (cPlayer != null)
+                            cPlayer.setPlot(r);
+                    } catch (Exception e) {
+                        rs.close();
+                    }
+                }
             }rs.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
-
-    }
-
-    public void initializeShopPlots() {
-
-
 
     }
 

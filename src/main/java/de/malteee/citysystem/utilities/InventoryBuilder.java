@@ -43,16 +43,19 @@ public class InventoryBuilder implements Listener {
         return this;
     }
 
-    public InventoryBuilder setSlots(final ItemStack itemStack, final int... slots) {
-        for (int i : slots)
+    public InventoryBuilder setSlots(final ItemStack itemStack, final Consumer<InventoryClickEvent> inventoryClickEvent, final int... slots) {
+        for (int i : slots) {
             this.inventory.setItem(i, itemStack);
+            this.clickActions.put(i, inventoryClickEvent);
+        }
         return this;
     }
 
-    public InventoryBuilder setSlot(final int slot, final ItemStack itemStack, boolean set) {
+    public InventoryBuilder setSlot(final int slot, final ItemStack itemStack, boolean set, final Consumer<InventoryClickEvent> inventoryClickEvent) {
         if (set) {
             this.clickActions.remove(slot);
             this.inventory.setItem(slot, itemStack);
+            this.clickActions.put(slot, inventoryClickEvent);
         }
         return this;
     }

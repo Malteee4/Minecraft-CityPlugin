@@ -59,6 +59,10 @@ public abstract class Plot {
         return name;
     }
 
+    public void setName(String name) {
+        this.name = name;
+    }
+
     public void addBuildingRights() {
         //TODO
 
@@ -74,4 +78,11 @@ public abstract class Plot {
     }
 
     public abstract void setRentable(boolean val);
+
+    public int getSize() {
+        int i = 0;
+        for (Area area : areas)
+            i += area.getSurface();
+        return i;
+    }
 }

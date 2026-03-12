@@ -6,6 +6,7 @@ import org.bukkit.Location;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class CityManager {
 
@@ -25,8 +26,6 @@ public class CityManager {
         }
     }
 
-
-
     public ArrayList<City> getCities() {
         return cities;
     }
@@ -41,6 +40,11 @@ public class CityManager {
 
     public List<String> getCityNames() {
         return names;
+    }
+
+    public City getCity(String id) {
+        Optional<City> city = cities.stream().filter(c -> c.getName().equals(id)).findFirst();
+        return city.orElse(null);
     }
 
 }

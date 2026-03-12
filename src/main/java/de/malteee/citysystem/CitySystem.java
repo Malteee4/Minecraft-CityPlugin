@@ -63,7 +63,7 @@ public class CitySystem extends JavaPlugin {
     private List<String> maps = getConfig().getStringList("worlds");
 
     public static DecimalFormat df = new DecimalFormat("#0.00");
-    private static FileConfiguration jobConfig;
+    private static FileConfiguration jobConfig, shopConfig;
 
 
     //java -Xms10G -Xmx10G -jar paper-1.21.11-126.jar nogui
@@ -73,7 +73,7 @@ public class CitySystem extends JavaPlugin {
         db = new Database().connect("database");
 
         File path = new File(this.getDataFolder(), "jobs.yml");
-        if(!path.exists()) { System.out.println(path.toString());
+        if(!path.exists()) {
             try {
                 path.createNewFile();
             } catch (IOException e) {
@@ -81,6 +81,16 @@ public class CitySystem extends JavaPlugin {
             }
         }
         jobConfig = YamlConfiguration.loadConfiguration(path);
+
+        path = new File(this.getDataFolder(), "shops.yml");
+        if(!path.exists()) {
+            try {
+                path.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        shopConfig = YamlConfiguration.loadConfiguration(path);
 
         PluginManager pluginManager = getPlugin().getServer().getPluginManager();
         pluginManager.registerEvents(new PlayerJoinListener(), this);
@@ -297,6 +307,18 @@ public class CitySystem extends JavaPlugin {
     public static void saveJobConfig() {
         try {
             jobConfig.save(new File(CitySystem.getPlugin().getDataFolder(), "jobs.yml"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static FileConfiguration getShopConfig() {
+        return shopConfig;
+    }
+
+    public static void saveShopConfig() {
+        try {
+            shopConfig.save(new File(CitySystem.getPlugin().getDataFolder(), "shops.yml"));
         } catch (IOException e) {
             e.printStackTrace();
         }

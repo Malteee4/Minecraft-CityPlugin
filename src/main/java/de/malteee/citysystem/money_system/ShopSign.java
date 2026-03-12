@@ -7,6 +7,8 @@ import java.util.UUID;
 
 import de.malteee.citysystem.CitySystem;
 import de.malteee.citysystem.commands_admin.BreakShopCommand;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -15,6 +17,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Chest;
 import org.bukkit.block.Sign;
+import org.bukkit.block.sign.Side;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.ArmorStand;
 import org.bukkit.entity.Entity;
@@ -32,7 +35,7 @@ import org.bukkit.inventory.ItemStack;
 
 public class ShopSign implements Listener{
 
-    FileConfiguration config = CitySystem.getPlugin().getConfig();
+    FileConfiguration config = CitySystem.getShopConfig();
 
     public static HashMap<Player, Boolean> item = new HashMap<Player, Boolean>();
     private static HashMap<Player, Integer> ids = new HashMap<>();
@@ -45,16 +48,56 @@ public class ShopSign implements Listener{
     public void onSignPlace(SignChangeEvent e) {
         Player p = e.getPlayer();
         Location s = e.getBlock().getLocation();
+        if (!e.getBlock().getType().toString().contains("WALL")) return;
+        if (e.getLine(0) == null) return;
         if(e.getLine(0).equalsIgnoreCase("shop")) {
             if(!wait.containsKey(p)) {
                 wait.put(p, false);
             }
             if(wait.get(p) == false) {
+                if (e.getLine(1) == null)
+                    return;
                 wait.put(p, true);
+                String prices = e.getLine(1).toLowerCase();
+                int priceB = -1;
+                int priceS = -1;
+                if (!prices.contains("b") && !prices.contains("s")) {
+                    wait.put(p, false);
+                    p.sendMessage("§cShop couldn't be created! \nReason: Please use b<price> for selling to other players and s<price> for buying from other players! (you can use both!)");
+                    return;
+                }
                 try {
-                    int i = Integer.parseInt(e.getLine(1));
+                    if (prices.contains("s")) {
+                        int place = prices.indexOf("s");
+                        if (prices.length() < place + 1)
+                            throw new Exception();
+                        String b = "";
+                        for (int i = place + 1; i < prices.length(); i++) {
+                            if (isNumeric(prices.substring(i, i)))
+                                b = b + prices.charAt(i);
+                            else
+                                break;
+                        }priceS = Integer.parseInt(b);
+                        if (priceS < 0)
+                            throw new Exception();
+                    }
+                    if (prices.contains("b")) {
+                        int place = prices.indexOf("b");
+                        if (prices.length() < place + 1)
+                            throw new Exception();
+                        String b = "";
+                        for (int i = place + 1; i < prices.length(); i++) {
+                            if (isNumeric(prices.substring(i, i)))
+                                b = b + prices.charAt(i);
+                            else
+                                break;
+                        }priceB = Integer.parseInt(b);
+                        if (priceB < 0)
+                            throw new Exception();
+                    }
+
                 }catch(Exception ee) {
-                    wait.put(p, false);p.sendMessage("§cShop konnte nicht erstellt werden \nGrund: ungültiger Preis!"); return;
+                    wait.put(p, false); p.sendMessage("§cShop couldn't be created! \nReason: invalid price!"); return;
                 }
                 ArrayList<Location> locs = new ArrayList<>();
                 Location l1 = e.getBlock().getRelative(BlockFace.DOWN).getLocation(); locs.add(l1);
@@ -67,16 +110,20 @@ public class ShopSign implements Listener{
                         e.setLine(0, "§l§f[Shop]");
                         e.setLine(3, e.getPlayer().getName());
                         String st = loc.getWorld().getName() + "" + loc.getBlockX() + "" + loc.getBlockY() + "" + loc.getBlockZ();
-                        config.set(s.getWorld().getName() + "" + s.getBlockX() + "" + s.getBlockY() + "" + s.getBlockZ() + ".chest", st);
-                        config.set(s.getWorld().getName() + "" + s.getBlockX() + "" + s.getBlockY() + "" + s.getBlockZ() + ".owner", p.getUniqueId().toString());
-                        config.set(s.getWorld().getName() + "" + s.getBlockX() + "" + s.getBlockY() + "" + s.getBlockZ() + ".ownername", p.getName());
-                        config.set(s.getWorld().getName() + "" + s.getBlockX() + "" + s.getBlockY() + "" + s.getBlockZ() + ".chestloc", loc);
+                        config.set(st + ".chest", st);
+                        config.set(st + ".owner", p.getUniqueId().toString());
+                        config.set(st + ".ownername", p.getName());
+                        config.set(st + ".chestloc", loc);
                         List<String> shops = new ArrayList<String>();
                         if(config.contains("players." + p.getUniqueId().toString() + ".shops.shops")) {
                             shops = config.getStringList("players." + p.getUniqueId().toString() + ".shops.shops");
                         }shops.add(s.getWorld().getName() + "" + s.getBlockX() + "" + s.getBlockY() + "" + s.getBlockZ());
-                        config.set("players." + p.getUniqueId().toString() + ".shops.shops", shops); CitySystem.getPlugin().saveConfig();
-                        config.set(s.getWorld().getName() + "" + s.getBlockX() + "" + s.getBlockY() + "" + s.getBlockZ() + ".preis", e.getLine(1));
+                        config.set("players." + p.getUniqueId().toString() + ".shops.shops", shops);
+                        if (priceS > 0)
+                            config.set(st + ".preis.s", priceS);
+                        if (priceB > 0)
+                            config.set(st + ".preis.b", priceB);
+                        CitySystem.saveShopConfig();
                         Chest chest = (Chest) loc.getBlock().getState();
                         chest.setCustomName(s.getWorld().getName() + "" + s.getBlockX() + "" + s.getBlockY() + "" + s.getBlockZ()); chest.update();
                         if(chest.getBlockData().getAsString().contains("right")) {
@@ -116,10 +163,12 @@ public class ShopSign implements Listener{
                                     config.set(ch.getLocation().getWorld().getName() + "" + ch.getLocation().getBlockX() + "" + ch.getLocation().getBlockY() + "" + ch.getLocation().getBlockZ(), st); config.set(st + ".typ", "l");}
                             }
                         }
-                        ArmorStand armor = (ArmorStand) loc.getWorld().spawnEntity(new Location(loc.getWorld(), loc.getX() + 0.5, loc.getY() - 0.5, loc.getZ() + 0.5, p.getLocation().getYaw() - 180, 0), EntityType.ARMOR_STAND);
-                        armor.setInvisible(true); armor.setGravity(false); armor.setCustomName("mmaalltteemm2"); armor.setCustomNameVisible(false); a.put(p, armor);
-                        e.getPlayer().sendMessage("§lUm das Shopschild fertigzustellen linksklicke nun mit dem zu verkaufenden Item auf das Schild!");
-                        CitySystem.getPlugin().saveConfig(); item.put(e.getPlayer(), true); Bukkit.getScheduler().scheduleSyncDelayedTask(CitySystem.getPlugin(), new Runnable() {
+                        //ArmorStand armor = (ArmorStand) loc.getWorld().spawnEntity(new Location(loc.getWorld(), loc.getX() + 0.5, loc.getY() - 0.5, loc.getZ() + 0.5, p.getLocation().getYaw() - 180, 0), EntityType.ARMOR_STAND);
+                        //armor.setInvisible(true); armor.setGravity(false); armor.setCustomName("mmaalltteemm2"); armor.setCustomNameVisible(false); a.put(p, armor);
+                        //e.getPlayer().sendMessage("§lUm das Shopschild fertigzustellen linksklicke nun mit dem zu verkaufenden Item auf das Schild!");
+                        p.sendMessage("§aTo finish the shop sign make a left click, with the item you want to sell, on the sign!");
+                        CitySystem.saveShopConfig();
+                        item.put(e.getPlayer(), true); Bukkit.getScheduler().scheduleSyncDelayedTask(CitySystem.getPlugin(), new Runnable() {
                             @Override
                             public void run() {
                                 wait.put(p, false);
@@ -129,14 +178,14 @@ public class ShopSign implements Listener{
                             @Override
                             public void run() {
                                 if(item.containsKey(p)) {
-                                    item.remove(p); p.sendMessage("§cDu hast zu lange gebraucht! Der Vorgang wurde abgebrochen!");
+                                    item.remove(p); p.sendMessage("§That took to long! The progress has been canceled!");
                                 }
                             }
-                        }, 20*16));
+                        }, 20*18));
                     }
                 }
             }else {
-                e.getPlayer().sendMessage("§cShopschild konnte nicht erstellt werden \nGrund: Preis(e) fehlen!");
+                e.getPlayer().sendMessage("§cShop couldn't be created! \nReason: Price is missing!");
             }
 
         }else {
@@ -150,10 +199,9 @@ public class ShopSign implements Listener{
         Player p = e.getPlayer(); Material b = e.getClickedBlock().getType();
         if(e.getAction().equals(Action.LEFT_CLICK_BLOCK)) {
             if(item.containsKey(p) && config.contains(e.getClickedBlock().getLocation().getWorld().getName() + "" + e.getClickedBlock().getLocation().getBlockX() + "" + e.getClickedBlock().getLocation().getBlockY() + "" + e.getClickedBlock().getLocation().getBlockZ() + ".owner")) {
-                if(item.get(p) && config.getString(e.getClickedBlock().getLocation().getWorld().getName() + "" + e.getClickedBlock().getLocation().getBlockX() + "" + e.getClickedBlock().getLocation().getBlockY() + "" + e.getClickedBlock().getLocation().getBlockZ() + ".owner").equalsIgnoreCase(p.getUniqueId().toString())
-                        && (b.equals(Material.BIRCH_WALL_SIGN) || b.equals(Material.OAK_WALL_SIGN) || b.equals(Material.SPRUCE_WALL_SIGN) || b.equals(Material.ACACIA_WALL_SIGN) || b.equals(Material.DARK_OAK_WALL_SIGN)
-                        || b.equals(Material.JUNGLE_WALL_SIGN) || b.equals(Material.CRIMSON_WALL_SIGN) || b.equals(Material.WARPED_WALL_SIGN) || b.equals(Material.CRIMSON_SIGN) || b.equals(Material.JUNGLE_SIGN)
-                        || b.equals(Material.BIRCH_SIGN) || b.equals(Material.OAK_SIGN) || b.equals(Material.SPRUCE_SIGN) || b.equals(Material.ACACIA_SIGN) || b.equals(Material.DARK_OAK_SIGN) || b.equals(Material.WARPED_SIGN))) {
+                if(item.get(p) && b.toString().contains("WALL_SIGN")
+                        && config.getString(e.getClickedBlock().getLocation().getWorld().getName() + "" + e.getClickedBlock().getLocation().getBlockX() + ""
+                        + e.getClickedBlock().getLocation().getBlockY() + "" + e.getClickedBlock().getLocation().getBlockZ() + ".owner").equalsIgnoreCase(p.getUniqueId().toString())) {
                     if(!p.getInventory().getItemInMainHand().getType().equals(Material.AIR)) {
                         if(!neu.containsKey(p)) {
                             Sign sign = (Sign) e.getClickedBlock().getState();
@@ -166,7 +214,7 @@ public class ShopSign implements Listener{
                             sign.setLine(0, sign.getLine(0) + "  §l[§0"+hand.getAmount() + "§f]");
                             sign.setLine(2, "§e" + hand.getType().toString());
                             sign.update();
-                            p.sendMessage("§l§aShopschild erfolgreich fertiggestellt!");
+                            p.sendMessage("§l§aShop sign finished!");
                             a.get(p).getEquipment().setHelmet(hand); a.remove(p);
                             item.put(p, false); wait.put(p, false);
                             CitySystem.getPlugin().saveConfig(); CitySystem.getPlugin().reloadConfig();
@@ -181,7 +229,7 @@ public class ShopSign implements Listener{
                             sign.setLine(0, "§l§f[Shop]" + "  §l[§0"+hand.getAmount() + "§f]");
                             sign.setLine(2, "§e" + hand.getType().toString());
                             sign.update();
-                            p.sendMessage("§l§aShopschild erfolgreich fertiggestellt!");
+                            p.sendMessage("§l§aShop sign finished!");
                             for(Entity entity : loc.getWorld().getEntities()) {
                                 Location lE = entity.getLocation();
                                 if(entity.getType().equals(EntityType.ARMOR_STAND) && lE.getX() == (loc.getX() + 0.5) && lE.getY() == (loc.getY() - 0.5) && lE.getZ() == (loc.getZ() + 0.5)) {
@@ -192,30 +240,23 @@ public class ShopSign implements Listener{
                             neu.remove(p); item.put(p, false);
                         }
                     }else {
-                        p.sendMessage("§cDu kannst nicht nichts verkaufen!");
+                        p.sendMessage("§cYou can't sell nothing!");
                     }
                     Bukkit.getScheduler().cancelTask(ids.get(p));
                 }
-            }
-        }else if(e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-            if((b.equals(Material.BIRCH_WALL_SIGN) || b.equals(Material.OAK_WALL_SIGN) || b.equals(Material.SPRUCE_WALL_SIGN) || b.equals(Material.ACACIA_WALL_SIGN) || b.equals(Material.DARK_OAK_WALL_SIGN)
-                    || b.equals(Material.JUNGLE_WALL_SIGN) || b.equals(Material.CRIMSON_WALL_SIGN) || b.equals(Material.WARPED_WALL_SIGN) || b.equals(Material.CRIMSON_SIGN) || b.equals(Material.JUNGLE_SIGN)
-                    || b.equals(Material.BIRCH_SIGN) || b.equals(Material.OAK_SIGN) || b.equals(Material.SPRUCE_SIGN) || b.equals(Material.ACACIA_SIGN) || b.equals(Material.DARK_OAK_SIGN) || b.equals(Material.WARPED_SIGN))) {
-                Sign sign = (Sign) e.getClickedBlock().getState();
-                if(config.contains(sign.getLocation().getWorld().getName() + "" + sign.getLocation().getBlockX() + "" + sign.getLocation().getBlockY() + "" + sign.getLocation().getBlockZ())) {
-                    String chest = config.getString(sign.getLocation().getWorld().getName() + "" + sign.getLocation().getBlockX() + "" + sign.getLocation().getBlockY() + "" + sign.getLocation().getBlockZ() + ".chest");
-                    ItemStack item = new ItemStack(Material.valueOf(config.getString(chest + ".sonstiges.type")), config.getInt(chest + ".sonstiges.menge"));
-                    double preis = Double.parseDouble(sign.getLine(1));
-                    boolean pInvFrei = false;
-                    if(p.getInventory().firstEmpty() == -1) {
-                        for(ItemStack i : p.getInventory().getContents()) {
-                            if(i.getType() == item.getType() && i.getAmount() + item.getAmount() <= 64) {
-                                pInvFrei = true;
-                            }
+            }else {
+                //TODO -> sell item if possible
+                if(b.toString().contains("WALL_SIGN")) {
+                    Sign sign = (Sign) e.getClickedBlock().getState();
+                    if (config.contains(sign.getLocation().getWorld().getName() + "" + sign.getLocation().getBlockX() + "" + sign.getLocation().getBlockY() + "" + sign.getLocation().getBlockZ())) {
+                        String chest = config.getString(sign.getLocation().getWorld().getName() + "" + sign.getLocation().getBlockX() + "" + sign.getLocation().getBlockY() + "" + sign.getLocation().getBlockZ() + ".chest");
+                        ItemStack item = new ItemStack(Material.valueOf(config.getString(chest + ".sonstiges.type")), config.getInt(chest + ".sonstiges.menge"));
+                        if (!config.contains(chest + ".preis.s")) {
+                            p.sendMessage("§cYou can't sell items here!");
+                            return;
                         }
-                    }else {
-                        pInvFrei = true;
-                    }if(pInvFrei) {
+                        double preis = config.getInt(chest + ".preis.s");
+                        MoneyManager mm = CitySystem.getMm();
                         Player verkaeufer = null; String ver = ""; UUID name = null; UUID offline = null;
                         for(Player pl : Bukkit.getOnlinePlayers()) {
                             if(pl.getName().equals(sign.getLine(3))) {
@@ -226,7 +267,130 @@ public class ShopSign implements Listener{
                         Chest ch = (Chest) c.getBlock().getState();
                         if(verkaeufer != null) {
                             if(verkaeufer.equals(p)) {
-                                p.sendMessage("§cDu kannst nichts von deinen eigenen Shops kaufen!");return;
+                                p.sendMessage("§cYou can't buy something from your own shop!");return;
+                            }
+                        }else {
+                            for(OfflinePlayer off : Bukkit.getOfflinePlayers()) {
+                                if(off.getName().equals(sign.getLine(3))) {
+                                    ver = off.getUniqueId().toString(); name = off.getUniqueId(); offline = off.getUniqueId();
+                                }
+                            }
+                        }
+                        boolean full = true; Chest ches = null;
+                        ArrayList<Location> ls = new ArrayList<>();
+                        Location l = new Location(c.getWorld(), c.getX(), c.getY(), c.getZ() - 1); Location l1 = new Location(c.getWorld(), c.getX() + 1, c.getY(), c.getZ());
+                        Location l2 = new Location(c.getWorld(), c.getX(), c.getY(), c.getZ() + 1); Location l3 = new Location(c.getWorld(), c.getX() - 1, c.getY(), c.getZ());
+                        ls.add(l3); ls.add(l2); ls.add(l1); ls.add(l);
+                        for(Location loc : ls) {
+                            if(config.contains(loc.getWorld().getName() + "" + loc.getBlockX() + "" + loc.getBlockY() + "" + loc.getBlockZ())) {
+                                if(config.getString(loc.getWorld().getName() + "" + loc.getBlockX() + "" + loc.getBlockY() + "" + loc.getBlockZ()).equals(c.getWorld().getName() + "" + c.getBlockX() + "" + c.getBlockY() + "" + c.getBlockZ())) {
+                                    ches = (Chest) loc.getBlock().getState();
+                                }
+                            }
+                        }ls.clear();
+                        if (ches == null) return;
+                        for(ItemStack it : ch.getBlockInventory().getContents()) {
+                            if(it == null) {
+                                full = false;
+                                break;
+                            }else if (it.getType().equals(item.getType())){
+                                if (64 - it.getAmount() >= item.getAmount()) {
+                                    full = false;
+                                    break;
+                                }
+                            }
+                        }
+                        boolean hasItem = false;
+                        boolean hasAmount = false;
+                        for (ItemStack it : p.getInventory().getContents()) {
+                            if (it == null) continue;
+                            if (it.getType().equals(item.getType())) {
+                                hasItem = true;
+                                if (it.getAmount() >= item.getAmount()) {
+                                    hasAmount = true;
+                                    break;
+                                }
+
+                            }
+                        }
+                        if (!hasItem) {
+                            p.sendMessage("§cYou don't have that item in your inventory!");
+                            return;
+                        }
+                        if (!hasAmount) {
+                            p.sendMessage("§cYou don't have enough of that item!");
+                            return;
+                        }
+                        if(!full) {
+                            double sellerMoney = mm.getKonto(name).getMoney();
+                            if(sellerMoney >= preis) {
+
+                                ches.getInventory().addItem(item);
+                                p.getInventory().remove(item);
+
+                                mm.getKonto(p.getUniqueId()).addMoney(preis);
+                                mm.getKonto(name).removeMoney(preis);
+                                p.spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacy("§aYou just sold " + item.getAmount() + " x "
+                                        + item.getType().toString().replace("_", " ").toLowerCase() + " for §l" + preis + " " + (preis == 1 ? "Shard":"Shards") + "§r§a!"));
+                                /*if(!config.contains("players." + ver + ".shops.einnahmen")) {
+                                    config.set("players." + ver + ".shops.einnahmen", 0);
+                                }
+                                config.set("players." + ver + ".shops.einnahmen", config.getDouble("players." + ver + ".shops.einnahmen") + preis);
+                                if(verkaeufer != null) {
+                                    if(config.contains("players." + verkaeufer.getUniqueId().toString() + ".shops.benachrichtigungen.kaufbenachrichtigung")) {
+                                        if(config.getBoolean("players." + verkaeufer.getUniqueId().toString() + ".shops.benachrichtigungen.kaufbenachrichtigung")) {
+                                            verkaeufer.sendMessage("§2Der Spieler §6" + p.getName() + " §2 hat " + item.getAmount() + " mal §e" + item.getType().toString().toLowerCase() + " §2für §e" + preis + "$ §2gekauft!");
+                                        }
+                                    }else {
+                                        config.set("players." + verkaeufer.getUniqueId().toString() + ".shops.benachrichtigungen.kaufbenachrichtigung", false);
+                                    }
+                                    if(vorat - item.getAmount() < item.getAmount()) {
+                                        verkaeufer.sendMessage("§cDein Shop welcher " + item.getAmount() + " mal §6" + item.getType().toString().toLowerCase() + " §cverkauft ist nun leer!");
+                                    }
+                                }*/
+                                CitySystem.saveShopConfig();
+                            }else {
+                                p.sendMessage("§cThe owner of this shop has not enough money!");
+                            }
+                        }else {
+                            p.sendMessage("§cThe shop is full!");
+                        }
+                    }
+                }
+            }
+        }else if(e.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+            if(b.toString().contains("WALL_SIGN")) {
+                Sign sign = (Sign) e.getClickedBlock().getState();
+                if(config.contains(sign.getLocation().getWorld().getName() + "" + sign.getLocation().getBlockX() + "" + sign.getLocation().getBlockY() + "" + sign.getLocation().getBlockZ())) {
+                    String chest = config.getString(sign.getLocation().getWorld().getName() + "" + sign.getLocation().getBlockX() + "" + sign.getLocation().getBlockY() + "" + sign.getLocation().getBlockZ() + ".chest");
+                    ItemStack item = new ItemStack(Material.valueOf(config.getString(chest + ".sonstiges.type")), config.getInt(chest + ".sonstiges.menge"));
+                    if (!config.contains(chest + ".preis.b")) {
+                        p.sendMessage("§cYou can't buy items here!");
+                        return;
+                    }
+                    double preis = config.getInt(chest + ".preis.b");
+                    boolean pInvFrei = false;
+                    if(p.getInventory().firstEmpty() == -1) {
+                        for(ItemStack i : p.getInventory().getContents()) {
+                            if(i.getType() == item.getType() && i.getAmount() + item.getAmount() <= 64) {
+                                pInvFrei = true;
+                            }
+                        }
+                    }else {
+                        pInvFrei = true;
+                    }if(pInvFrei) {
+                        MoneyManager mm = CitySystem.getMm();
+                        Player verkaeufer = null; String ver = ""; UUID name = null; UUID offline = null;
+                        for(Player pl : Bukkit.getOnlinePlayers()) {
+                            if(pl.getName().equals(sign.getLine(3))) {
+                                verkaeufer = Bukkit.getPlayer(sign.getLine(3)); ver = verkaeufer.getUniqueId().toString(); name = verkaeufer.getUniqueId();
+                            }
+                        }
+                        Location c = config.getLocation(sign.getLocation().getWorld().getName() + "" + sign.getLocation().getBlockX() + "" + sign.getLocation().getBlockY() + "" + sign.getLocation().getBlockZ() + ".chestloc");
+                        Chest ch = (Chest) c.getBlock().getState();
+                        if(verkaeufer != null) {
+                            if(verkaeufer.equals(p)) {
+                                p.sendMessage("§cYou can't buy something from your own shop!");return;
                             }
                         }else {
                             for(OfflinePlayer off : Bukkit.getOfflinePlayers()) {
@@ -264,7 +428,7 @@ public class ShopSign implements Listener{
                                 leer = false;
                             }
                             if(!leer) {
-                                double buyermoney = 0;//CitySystem.getCityPlayer(p).getKonto().getMoney();
+                                double buyermoney = mm.getKonto(p.getUniqueId()).getMoney();
                                 get.setAmount(1); ItemStack rem = new ItemStack(item.getType(), 1);
                                 if(buyermoney >= preis) {
                                     boolean bo = false;
@@ -290,9 +454,8 @@ public class ShopSign implements Listener{
                                     }
                                     get.setAmount(item.getAmount());
                                     p.getInventory().addItem(get);
-                                    //TODO
-                                    //Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "money take " + p.getName() + " " + preis);
-                                    //Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "money give " + name + " " + preis);
+                                    mm.getKonto(p.getUniqueId()).removeMoney(preis);
+                                    mm.getKonto(name).addMoney(preis);
                                     if(!config.contains("players." + ver + ".shops.einnahmen")) {
                                         config.set("players." + ver + ".shops.einnahmen", 0);
                                     }
@@ -309,12 +472,12 @@ public class ShopSign implements Listener{
                                             verkaeufer.sendMessage("§cDein Shop welcher " + item.getAmount() + " mal §6" + item.getType().toString().toLowerCase() + " §cverkauft ist nun leer!");
                                         }
                                     }
-                                    CitySystem.getPlugin().saveConfig();
+                                    CitySystem.saveShopConfig();
                                 }else {
-                                    p.sendMessage("§cDu hast nicht genügend Geld!");
+                                    p.sendMessage("§cYou don't have enough money!");
                                 }
                             }else {
-                                p.sendMessage("§cDer Shop ist leer!");
+                                p.sendMessage("§cThe shop is empty!");
                             }
                         }else {
                             boolean leer = true; ItemStack get = null;
@@ -330,7 +493,7 @@ public class ShopSign implements Listener{
                                 leer = false;
                             }get.setAmount(1);
                             if(!leer) {
-                                double buyermoney = 0;//CitySystem.getCityPlayer(p).getKonto().getMoney();
+                                double buyermoney = mm.getKonto(p.getUniqueId()).getMoney();
                                 if(buyermoney >= preis) {
                                     for(ItemStack s : ch.getInventory().getContents()) {
                                         if(s != null) {
@@ -359,23 +522,22 @@ public class ShopSign implements Listener{
                                             verkaeufer.sendMessage("§cDein Shop welcher " + item.getAmount() + " mal §6" + item.getType().toString().toLowerCase() + " §cverkauft ist nun leer!");
                                         }
                                     }
-                                    //TODO
-                                    //Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "money take " + p.getName() + " " + preis);
-                                    //Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "money give " + name + " " + preis);
+                                    mm.getKonto(p.getUniqueId()).removeMoney(preis);
+                                    mm.getKonto(name).addMoney(preis);
                                     if(!config.contains("players." + ver + ".shops.einnahmen")) {
                                         config.set("players." + ver + ".shops.einnahmen", preis);
                                     }
                                     config.set("players." + ver + ".shops.einnahmen", config.getDouble("players." + ver + ".shops.einnahmen") + preis);
-                                    CitySystem.getPlugin().saveConfig();
+                                    CitySystem.saveShopConfig();
                                 }else {
-                                    p.sendMessage("§cDu hast nicht genügend Geld!");
+                                    p.sendMessage("§cYour don't have enough Shards!");
                                 }
                             }else {
-                                p.sendMessage("§cDer Shop ist leer!");
+                                p.sendMessage("§cThe shop is empty!");
                             }
                         }
                     }else {
-                        p.sendMessage("§cDein Inventar ist voll!");
+                        p.sendMessage("§cYour inventory is full!");
                     }
                 }
 
@@ -412,7 +574,7 @@ public class ShopSign implements Listener{
                             return;
                         }
                         if(!(config.getString(chest.getCustomName() + ".owner").equalsIgnoreCase(p.getUniqueId().toString()))) {
-                            p.sendMessage("§cDas ist nicht dein Shop!"); e.setCancelled(true);
+                            p.sendMessage("§cThat's not your shop!"); e.setCancelled(true);
                         }
                     }
                 }
@@ -492,5 +654,17 @@ public class ShopSign implements Listener{
                 e.setCancelled(true);
             }
         }
+    }
+
+    public static boolean isNumeric(String strNum) {
+        if (strNum == null) {
+            return false;
+        }
+        try {
+            double d = Double.parseDouble(strNum);
+        } catch (NumberFormatException nfe) {
+            return false;
+        }
+        return true;
     }
 }

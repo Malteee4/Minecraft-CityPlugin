@@ -215,9 +215,19 @@ public class JobManager implements Listener {
     @EventHandler
     public void handlePlayerKillEntity(EntityDeathEvent event) {
         Player player = event.getEntity().getKiller();
+        if (player == null) return;
         CityPlayer cPlayer = CitySystem.getCityPlayer(player);
         if (cPlayer == null) return;
-
+        Job job = cPlayer.getJob();
+        if (job == Job.HUNTER) {
+            EntityType killed = event.getEntityType();
+            for (EntityType type : job.getEntities()) {
+                if (killed.equals(type)) {
+                    tempPoints.put(player.getUniqueId(), tempPoints.get(player.getUniqueId()) + (job.getValue(type) * (1 + level.get(player.getUniqueId()) * 0.1)));
+                    break;
+                }
+            }
+        }
     }
 
     @EventHandler
@@ -232,10 +242,12 @@ public class JobManager implements Listener {
     public void handlePlayerFish(PlayerFishEvent event) {
         Player player = event.getPlayer();
         CityPlayer cPlayer = CitySystem.getCityPlayer(player);
+        if (event.getCaught() == null) return;
         if (cPlayer == null) return;
         if (!cPlayer.hasJob()) return;
         Job job = cPlayer.getJob();
         if (job == Job.FISHER) {
+            //player.sendMessage(event.getCaught().getPickItemStack().getType().toString());
             tempPoints.put(player.getUniqueId(), tempPoints.get(player.getUniqueId()) + (10 * (1 + level.get(player.getUniqueId()) * 0.1)));
         }
     }

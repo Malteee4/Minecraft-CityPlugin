@@ -7,7 +7,7 @@ import de.malteee.citysystem.core.CityPlayer;
 import java.util.ArrayList;
 
 @Deprecated
-public class Shop extends Plot implements Rentable {
+public class Shop extends Plot {
 
     public Shop(String id, City city) {
         super(id, city, null, null, false);
@@ -17,27 +17,22 @@ public class Shop extends Plot implements Rentable {
         super(id, city, areas, null, false);
     }
 
-    @Override
     public void startRenting(CityPlayer player) {
 
     }
 
-    @Override
     public void stopRenting() {
 
     }
 
-    @Override
     public void setRent(int rent) {
 
     }
 
-    @Override
     public int getRent() {
         return 0;
     }
 
-    @Override
     public void setRentable(boolean val) {
         super.rentable = val;
     }
